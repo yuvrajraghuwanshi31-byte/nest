@@ -5,21 +5,40 @@ import { createClient } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
-const extra = (Constants.expoConfig?.extra ?? {}) as {
+const DEFAULT_SUPABASE_URL = 'https://ymfqedgdbxouctsbhgql.supabase.co';
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_MTX9WM16_EkahQ8EWT5TzQ_mXfUakgb';
+
+type SupabaseExtra = {
   supabaseUrl?: string;
   supabasePublishableKey?: string;
 };
 
+function readExtra(): SupabaseExtra {
+  const constants = Constants as typeof Constants & {
+    manifest?: { extra?: SupabaseExtra };
+    manifest2?: { extra?: SupabaseExtra };
+  };
+
+  return (
+    constants.expoConfig?.extra ??
+    constants.manifest2?.extra ??
+    constants.manifest?.extra ??
+    {}
+  );
+}
+
+const extra = readExtra();
+
 const supabaseUrl =
   process.env.EXPO_PUBLIC_SUPABASE_URL?.trim() ||
   extra.supabaseUrl?.trim() ||
-  '';
+  DEFAULT_SUPABASE_URL;
 
 const supabasePublishableKey =
   process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ||
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
   extra.supabasePublishableKey?.trim() ||
-  '';
+  DEFAULT_SUPABASE_PUBLISHABLE_KEY;
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabasePublishableKey);
 
@@ -45,15 +64,11 @@ if (!isSupabaseConfigured) {
   );
 }
 
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabasePublishableKey || 'public-anon-key',
-  {
-    auth: {
-      storage: authStorage,
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: Platform.OS === 'web',
-    },
+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
+  auth: {
+    storage: authStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: Platform.OS === 'web',
   },
-);
+});

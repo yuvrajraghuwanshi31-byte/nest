@@ -56,7 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = useCallback(
     async ({ name, email, password }: { name: string; email: string; password: string }) => {
       if (!isSupabaseConfigured) {
-        throw new Error('Supabase is not configured. Check .env and restart the app.');
+        throw new Error(
+          'Supabase is not configured. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env, then restart with `npx expo start --web --clear`. On Cloudflare, set those vars before `npm run build` and redeploy.',
+        );
       }
       const normalized = email.trim().toLowerCase();
       if (!name.trim()) throw new Error('Name is required.');
@@ -87,7 +89,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async ({ email, password }: { email: string; password: string }) => {
     if (!isSupabaseConfigured) {
-      throw new Error('Supabase is not configured. Check .env and restart the app.');
+      throw new Error(
+        'Supabase is not configured. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env, then restart with `npx expo start --web --clear`. On Cloudflare, set those vars before `npm run build` and redeploy.',
+      );
     }
     const normalized = email.trim().toLowerCase();
     const { data, error } = await supabase.auth.signInWithPassword({
