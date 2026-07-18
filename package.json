@@ -30,8 +30,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
-    "typescript": "~6.0.3",
-    "wrangler": "^4.112.0"
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "start": "expo start",
@@ -39,8 +38,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "build": "expo export -p web",
-    "deploy": "npm run build && wrangler deploy",
-    "pages:deploy": "npm run build && npx wrangler pages deploy dist --project-name=nest"
+    "deploy": "npm run build && npx vercel --prod"
   },
   "engines": {
     "node": ">=20"

@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async ({ name, email, password }: { name: string; email: string; password: string }) => {
       if (!isSupabaseConfigured) {
         throw new Error(
-          'Supabase is not configured. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env, then restart with `npx expo start --web --clear`. On Cloudflare, set those vars before `npm run build` and redeploy.',
+          'Supabase is not configured. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env, then restart with `npx expo start --web --clear`. On Vercel, set those vars in Project Settings → Environment Variables and redeploy.',
         );
       }
       const normalized = email.trim().toLowerCase();
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(async ({ email, password }: { email: string; password: string }) => {
     if (!isSupabaseConfigured) {
       throw new Error(
-        'Supabase is not configured. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env, then restart with `npx expo start --web --clear`. On Cloudflare, set those vars before `npm run build` and redeploy.',
+        'Supabase is not configured. Add EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY to .env, then restart with `npx expo start --web --clear`. On Vercel, set those vars in Project Settings → Environment Variables and redeploy.',
       );
     }
     const normalized = email.trim().toLowerCase();
