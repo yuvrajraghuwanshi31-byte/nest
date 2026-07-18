@@ -6,7 +6,7 @@ import { NestText } from '@/components/NestText';
 import { Screen } from '@/components/Screen';
 import { TaskRow } from '@/components/TaskRow';
 import { Button } from '@/components/ui/Button';
-import { colors, fonts, space } from '@/constants/theme';
+import { colors, fonts, radius, space } from '@/constants/theme';
 import { useWideLayout } from '@/hooks/useWideLayout';
 import { useTasks } from '@/lib/TasksContext';
 
@@ -18,8 +18,8 @@ export default function DoThisNextScreen() {
 
   return (
     <Screen>
-      <Animated.View entering={FadeIn.duration(450)} style={styles.header}>
-        {!wide ? <NestLogo size={32} style={styles.mobileBrand} /> : null}
+      <Animated.View entering={FadeIn.duration(350)} style={styles.header}>
+        {!wide ? <NestLogo size={28} style={styles.mobileBrand} /> : null}
         <NestText variant="label">Do this next</NestText>
         <NestText variant="title" style={styles.headline}>
           {greeting()}, here’s your focus.
@@ -95,40 +95,42 @@ function joinTitles(titles: string[]) {
 
 const styles = StyleSheet.create({
   header: {
-    gap: space.sm,
+    gap: space.xs,
   },
   mobileBrand: {
-    marginBottom: space.xs,
+    marginBottom: space.xxs,
   },
   headline: {
-    maxWidth: 640,
+    maxWidth: 560,
   },
   speakBlock: {
     backgroundColor: colors.surfaceRaised,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.line,
-    padding: space.lg,
-    gap: space.sm,
+    borderRadius: radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.lineStrong,
+    paddingVertical: space.md,
+    paddingHorizontal: space.md,
+    gap: space.xs,
   },
   speakLine: {
     color: colors.ink,
     fontFamily: fonts.display,
-    fontSize: 22,
-    lineHeight: 30,
+    fontSize: 20,
+    lineHeight: 26,
+    letterSpacing: -0.3,
   },
   listLabel: {
-    marginBottom: space.sm,
+    marginBottom: space.xs,
   },
   loadingBlock: {
-    gap: space.md,
+    gap: space.sm,
     alignItems: 'flex-start',
-    paddingVertical: space.md,
+    paddingVertical: space.sm,
   },
   errorBlock: {
     gap: space.sm,
-    padding: space.md,
-    borderRadius: 16,
+    padding: space.sm,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.urgent,
     backgroundColor: colors.surface,

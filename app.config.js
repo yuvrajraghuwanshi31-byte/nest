@@ -1,0 +1,44 @@
+/** @type {import('expo/config').ExpoConfig} */
+module.exports = ({ config }) => ({
+  ...config,
+  name: 'Nest',
+  slug: 'nest',
+  version: '1.0.0',
+  orientation: 'default',
+  icon: './assets/images/nest-logo.png',
+  scheme: 'nest',
+  userInterfaceStyle: 'dark',
+  ios: {
+    supportsTablet: true,
+  },
+  android: {
+    adaptiveIcon: {
+      backgroundColor: '#0A0A0A',
+      foregroundImage: './assets/images/nest-logo.png',
+    },
+    predictiveBackGestureEnabled: false,
+  },
+  web: {
+    bundler: 'metro',
+    output: 'static',
+    favicon: './assets/images/nest-logo.png',
+  },
+  plugins: [
+    'expo-router',
+    [
+      'expo-splash-screen',
+      {
+        image: './assets/images/nest-logo.png',
+        resizeMode: 'contain',
+        backgroundColor: '#0A0A0A',
+      },
+    ],
+  ],
+  experiments: {
+    typedRoutes: true,
+  },
+  extra: {
+    supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
+    supabasePublishableKey: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  },
+});

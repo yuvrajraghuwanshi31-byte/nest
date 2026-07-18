@@ -1,6 +1,6 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 
 import { AuthShell } from '@/components/AuthShell';
 import { NestText } from '@/components/NestText';
@@ -22,7 +22,14 @@ export default function SignupScreen() {
     setError(null);
     try {
       await signUp({ name, email, password });
-      router.replace('/home');
+      Alert.alert(
+        'Connect Craft?',
+        'Nest pulls your todos from Craft. In the Craft app, open Imagine in the sidebar → Add API Connection → copy your API URL. Then open Connections in Nest (Connect tab on your phone) and tap Sync Craft now.',
+        [
+          { text: 'Go to Connections', onPress: () => router.replace('/connections') },
+          { text: 'Maybe later', onPress: () => router.replace('/home') },
+        ],
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not create account.');
     } finally {

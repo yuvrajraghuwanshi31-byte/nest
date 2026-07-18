@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Sidebar } from '@/components/Sidebar';
 import { TabIcon } from '@/components/TabIcon';
-import { colors } from '@/constants/theme';
+import { colors, fonts } from '@/constants/theme';
 import { useWideLayout } from '@/hooks/useWideLayout';
 
 export default function TabLayout() {
@@ -23,12 +23,18 @@ export default function TabLayout() {
               : {
                   backgroundColor: colors.mistDeep,
                   borderTopColor: colors.line,
-                  height: 64,
-                  paddingTop: 6,
+                  borderTopWidth: StyleSheet.hairlineWidth,
+                  height: 58,
+                  paddingTop: 4,
+                  paddingBottom: 4,
                 },
             tabBarLabelStyle: {
-              fontFamily: 'DMSans_500Medium',
-              fontSize: 12,
+              fontFamily: fonts.bodyMedium,
+              fontSize: 11,
+              marginTop: 2,
+            },
+            tabBarItemStyle: {
+              gap: 2,
             },
           }}>
           <Tabs.Screen

@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, type ViewStyle } from 'react-native';
 
 import { NestText } from '@/components/NestText';
-import { colors, fonts, space } from '@/constants/theme';
+import { colors, fonts, radius, space } from '@/constants/theme';
 
 type Props = {
   label: string;
@@ -40,9 +40,9 @@ export function Button({ label, onPress, variant = 'primary', disabled, style }:
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 48,
-    paddingHorizontal: space.lg,
-    borderRadius: 14,
+    minHeight: 44,
+    paddingHorizontal: space.md,
+    borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -50,19 +50,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink,
   },
   secondary: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: colors.lineStrong,
   },
   ghost: {
     backgroundColor: 'transparent',
   },
   dim: {
-    opacity: 0.7,
+    opacity: 0.65,
   },
   label: {
     fontFamily: fonts.bodyBold,
-    fontSize: 16,
+    fontSize: 14,
   },
   labelOnPrimary: {
     color: colors.black,

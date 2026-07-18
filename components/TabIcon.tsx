@@ -1,7 +1,7 @@
 import { StyleSheet, View, type ColorValue } from 'react-native';
 
 import { NestText } from '@/components/NestText';
-import { colors, fonts } from '@/constants/theme';
+import { colors, fonts, radius } from '@/constants/theme';
 
 const LABELS = {
   next: 'N',
@@ -27,17 +27,17 @@ export function TabIcon({
 
 const styles = StyleSheet.create({
   wrap: {
-    width: 26,
-    height: 26,
-    borderRadius: 8,
-    borderWidth: 1.5,
+    width: 22,
+    height: 22,
+    borderRadius: radius.sm,
+    borderWidth: 1.25,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.mist,
+    backgroundColor: colors.surface,
   },
   label: {
     fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    lineHeight: 14,
+    fontSize: 10,
+    lineHeight: 12,
   },
 });

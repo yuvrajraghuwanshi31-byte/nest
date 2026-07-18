@@ -5,7 +5,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { NestText } from '@/components/NestText';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/ui/Button';
-import { colors, fonts, space } from '@/constants/theme';
+import { colors, fonts, radius, space } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
 import { useTasks } from '@/lib/TasksContext';
 import { useWideLayout } from '@/hooks/useWideLayout';
@@ -21,8 +21,22 @@ export default function ConnectionsScreen() {
         <NestText variant="label">Connections</NestText>
         <NestText variant="title">Control school + todos from Nest</NestText>
         <NestText variant="subtitle">
-          Craft is live with your real tasks. Schoology connects next — no fake schoolwork in the
+          Link Craft to pull your real todos. Schoology connects next — no fake schoolwork in the
           list.
+        </NestText>
+      </View>
+
+      <View style={styles.setupCard}>
+        <NestText variant="label">Craft API setup</NestText>
+        <NestText variant="body" style={styles.setupLine}>
+          In Craft: open <NestText style={styles.setupEm}>Imagine</NestText> in the sidebar →{' '}
+          <NestText style={styles.setupEm}>Add API Connection</NestText> → copy your API URL. You
+          can manage connections anytime in Craft Settings → API.
+        </NestText>
+        <NestText variant="body" style={styles.setupLine}>
+          In Nest: stay on this screen (Connections on desktop,{' '}
+          <NestText style={styles.setupEm}>Connect</NestText> tab on phone) and tap{' '}
+          <NestText style={styles.setupEm}>Sync Craft now</NestText> once your API URL is set up.
         </NestText>
       </View>
 
@@ -105,33 +119,49 @@ function badgeColor(status: 'connected' | 'disconnected' | 'demo', id: string) {
 
 const styles = StyleSheet.create({
   header: {
+    gap: space.xs,
+  },
+  setupCard: {
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.lineStrong,
+    borderRadius: radius.lg,
+    padding: space.md,
     gap: space.sm,
   },
+  setupLine: {
+    color: colors.inkSoft,
+    lineHeight: 22,
+  },
+  setupEm: {
+    fontFamily: fonts.bodyBold,
+    color: colors.ink,
+  },
   list: {
-    gap: space.sm,
+    gap: space.xs,
   },
   card: {
     backgroundColor: colors.surface,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.line,
-    borderRadius: 20,
-    padding: space.lg,
-    gap: space.sm,
+    borderRadius: radius.lg,
+    padding: space.md,
+    gap: space.xs,
   },
   cardTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: space.sm,
+    gap: space.xs,
   },
   name: {
     fontFamily: fonts.bodyBold,
-    fontSize: 18,
+    fontSize: 16,
   },
   badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
+    paddingHorizontal: space.xs,
+    paddingVertical: 3,
+    borderRadius: radius.sm,
   },
   error: {
     color: colors.urgent,

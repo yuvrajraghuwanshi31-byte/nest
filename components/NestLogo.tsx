@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space.sm,
+    gap: space.xs,
   },
   wordmark: {
     fontFamily: fonts.display,

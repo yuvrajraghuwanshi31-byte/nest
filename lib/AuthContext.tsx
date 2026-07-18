@@ -1,12 +1,4 @@
 import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut as firebaseSignOut,
-  updateProfile,
-  type User as FirebaseUser,
-} from 'firebase/auth';
-import {
   createContext,
   useCallback,
   useContext,
@@ -16,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { friendlyAuthError, getFirebaseAuth } from './firebase';
+import { isSupabaseConfigured, supabase } from './supabase';
 
 export type User = {
   id: string;
@@ -39,57 +31,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    let unsub = () => {};
-    try {
-      const auth = getFirebaseAuth();
-      unsub = onAuthStateChanged(auth, (firebaseUser) => {
-        setUser(firebaseUser ? mapUser(firebaseUser) : null);
-        setReady(true);
-      });
-    } catch (e) {
-      console.error(e);
+    let mounted = true;
+
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!mounted) return;
+      setUser(await loadUser(data.session?.user ?? null));
       setReady(true);
-    }
-    return () => unsub();
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Avoid awaiting inside the callback; hydrate after event.
+      void loadUser(session?.user ?? null).then((next) => {
+        if (mounted) setUser(next);
+      });
+      setReady(true);
+    });
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = useCallback(
     async ({ name, email, password }: { name: string; email: string; password: string }) => {
+      if (!isSupabaseConfigured) {
+        throw new Error('Supabase is not configured. Check .env and restart the app.');
+      }
       const normalized = email.trim().toLowerCase();
       if (!name.trim()) throw new Error('Name is required.');
       if (!normalized.includes('@')) throw new Error('Enter a valid email.');
       if (password.length < 6) throw new Error('Password must be at least 6 characters.');
 
-      try {
-        const auth = getFirebaseAuth();
-        const cred = await createUserWithEmailAndPassword(auth, normalized, password);
-        await updateProfile(cred.user, { displayName: name.trim() });
-        setUser(mapUser(cred.user, name.trim()));
-      } catch (e) {
-        throw new Error(friendlyAuthError(e));
+      const { data, error } = await supabase.auth.signUp({
+        email: normalized,
+        password,
+        options: {
+          data: { name: name.trim() },
+        },
+      });
+
+      if (error) throw new Error(error.message);
+
+      // If email confirmation is required, there may be no session yet.
+      if (!data.session) {
+        throw new Error(
+          'Account created. Check your email to confirm, then sign in. (Or turn off email confirm in Supabase Auth settings for faster testing.)',
+        );
       }
+
+      setUser(await loadUser(data.user));
     },
     [],
   );
 
   const signIn = useCallback(async ({ email, password }: { email: string; password: string }) => {
-    const normalized = email.trim().toLowerCase();
-    try {
-      const auth = getFirebaseAuth();
-      const cred = await signInWithEmailAndPassword(auth, normalized, password);
-      setUser(mapUser(cred.user));
-    } catch (e) {
-      throw new Error(friendlyAuthError(e));
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase is not configured. Check .env and restart the app.');
     }
+    const normalized = email.trim().toLowerCase();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: normalized,
+      password,
+    });
+    if (error) throw new Error(error.message);
+    setUser(await loadUser(data.user));
   }, []);
 
   const signOut = useCallback(async () => {
-    try {
-      await firebaseSignOut(getFirebaseAuth());
-      setUser(null);
-    } catch (e) {
-      throw new Error(friendlyAuthError(e));
-    }
+    const { error } = await supabase.auth.signOut();
+    if (error) throw new Error(error.message);
+    setUser(null);
   }, []);
 
   const value = useMemo(
@@ -106,10 +118,32 @@ export function useAuth() {
   return ctx;
 }
 
-function mapUser(firebaseUser: FirebaseUser, fallbackName?: string): User {
+type AuthUser = {
+  id: string;
+  email?: string | null;
+  user_metadata?: Record<string, unknown>;
+};
+
+async function loadUser(user: AuthUser | null): Promise<User | null> {
+  if (!user) return null;
+
+  const metaName = user.user_metadata?.name;
+  let name =
+    typeof metaName === 'string' && metaName.trim()
+      ? metaName.trim()
+      : user.email?.split('@')[0] || 'Nest user';
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('name')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profile?.name?.trim()) name = profile.name.trim();
+
   return {
-    id: firebaseUser.uid,
-    name: firebaseUser.displayName || fallbackName || 'Nest user',
-    email: firebaseUser.email || '',
+    id: user.id,
+    name,
+    email: user.email ?? '',
   };
 }

@@ -15,7 +15,7 @@ export function Screen({ children, scroll = true }: { children: ReactNode; scrol
         styles.inner,
         {
           paddingTop: wide ? space.xl : insets.top + space.md,
-          paddingBottom: wide ? space.xl : insets.bottom + 96,
+          paddingBottom: wide ? space.xl : insets.bottom + 80,
           maxWidth: layout.maxWidth,
         },
       ]}>
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   inner: {
     width: '100%',
-    paddingHorizontal: space.lg,
-    gap: space.lg,
+    paddingHorizontal: layout.contentPad,
+    gap: space.md,
   },
 });

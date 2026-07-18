@@ -33,10 +33,12 @@ export function AuthShell({
         keyboardShouldPersistTaps="handled">
         <View style={styles.panel}>
           <Link href="/">
-            <NestLogo size={36} />
+            <NestLogo size={30} />
           </Link>
-          <NestText variant="title">{title}</NestText>
-          <NestText variant="subtitle">{subtitle}</NestText>
+          <View style={styles.heading}>
+            <NestText variant="title">{title}</NestText>
+            <NestText variant="subtitle">{subtitle}</NestText>
+          </View>
           <View style={styles.form}>{children}</View>
           <View style={styles.footer}>{footer}</View>
         </View>
@@ -55,15 +57,17 @@ const styles = StyleSheet.create({
   },
   panel: {
     width: '100%',
-    maxWidth: 440,
+    maxWidth: 400,
     gap: space.md,
+  },
+  heading: {
+    gap: space.xs,
   },
   form: {
-    gap: space.md,
-    marginTop: space.sm,
+    gap: space.sm,
   },
   footer: {
-    marginTop: space.sm,
-    gap: space.sm,
+    marginTop: space.xxs,
+    alignItems: 'center',
   },
 });

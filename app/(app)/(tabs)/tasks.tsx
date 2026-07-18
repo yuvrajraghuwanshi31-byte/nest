@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { NestText } from '@/components/NestText';
 import { Screen } from '@/components/Screen';
 import { TaskRow } from '@/components/TaskRow';
-import { colors, fonts, space } from '@/constants/theme';
+import { colors, fonts, radius, space } from '@/constants/theme';
 import { useTasks } from '@/lib/TasksContext';
 import type { TaskSource } from '@/lib/types';
 
@@ -67,18 +67,18 @@ export default function TasksScreen() {
 
 const styles = StyleSheet.create({
   header: {
-    gap: space.sm,
+    gap: space.xs,
   },
   filters: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: space.sm,
+    gap: space.xs,
   },
   chip: {
-    paddingHorizontal: space.md,
-    paddingVertical: space.sm,
-    borderRadius: 999,
-    borderWidth: 1,
+    paddingHorizontal: space.sm,
+    paddingVertical: space.xs,
+    borderRadius: radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.line,
     backgroundColor: colors.surface,
   },
