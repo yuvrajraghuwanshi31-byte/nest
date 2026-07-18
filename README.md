@@ -10,26 +10,30 @@ cp .env.example .env   # add your Craft API URL
 npm run web
 ```
 
-## Cloudflare Pages
+## Cloudflare Pages (Git)
 
-Build settings:
+In **Workers & Pages → your project → Settings → Builds**:
 
 | Setting | Value |
 |---|---|
 | Framework preset | None |
 | Build command | `npm run build` |
+| **Deploy command** | **Leave empty** |
 | Build output directory | `dist` |
-| Node version | `20` |
+| Root directory | `/` (default) |
+| Environment variable `NODE_VERSION` | `20` |
 
-Environment variable (Pages → Settings → Environment variables):
+Do **not** set Deploy command to `npx wrangler deploy`. Pages already publishes `dist` after the build.
+
+Environment variable (Production + Preview):
 
 ```
 EXPO_PUBLIC_CRAFT_API_URL=https://connect.craft.do/links/YOUR_LINK/api/v1
 ```
 
-Treat that Craft URL like a password.
+Treat that Craft URL like a password. After changing build settings, click **Retry deployment**.
 
-### Deploy from CLI (optional)
+### CLI deploy (optional)
 
 ```bash
 npm run pages:deploy
