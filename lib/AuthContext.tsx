@@ -1,5 +1,11 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Crypto from 'expo-crypto';
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  updateProfile,
+  type User as FirebaseUser,
+} from 'firebase/auth';
 import {
   createContext,
   useCallback,
@@ -10,13 +16,13 @@ import {
   type ReactNode,
 } from 'react';
 
+import { friendlyAuthError, getFirebaseAuth } from './firebase';
+
 export type User = {
   id: string;
   name: string;
   email: string;
 };
-
-type StoredUser = User & { passwordHash: string };
 
 type AuthContextValue = {
   user: User | null;
@@ -26,9 +32,6 @@ type AuthContextValue = {
   signOut: () => Promise<void>;
 };
 
-const USERS_KEY = 'nest.users';
-const SESSION_KEY = 'nest.session';
-
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -36,62 +39,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const sessionRaw = await AsyncStorage.getItem(SESSION_KEY);
-        if (sessionRaw) {
-          const session = JSON.parse(sessionRaw) as User;
-          setUser(session);
-        }
-      } finally {
+    let unsub = () => {};
+    try {
+      const auth = getFirebaseAuth();
+      unsub = onAuthStateChanged(auth, (firebaseUser) => {
+        setUser(firebaseUser ? mapUser(firebaseUser) : null);
         setReady(true);
-      }
-    })();
-  }, []);
-
-  const signUp = useCallback(async ({ name, email, password }: { name: string; email: string; password: string }) => {
-    const normalized = email.trim().toLowerCase();
-    if (!name.trim()) throw new Error('Name is required.');
-    if (!normalized.includes('@')) throw new Error('Enter a valid email.');
-    if (password.length < 6) throw new Error('Password must be at least 6 characters.');
-
-    const users = await readUsers();
-    if (users.some((u) => u.email === normalized)) {
-      throw new Error('An account with that email already exists.');
+      });
+    } catch (e) {
+      console.error(e);
+      setReady(true);
     }
-
-    const passwordHash = await hashPassword(password);
-    const nextUser: StoredUser = {
-      id: Crypto.randomUUID(),
-      name: name.trim(),
-      email: normalized,
-      passwordHash,
-    };
-    await AsyncStorage.setItem(USERS_KEY, JSON.stringify([...users, nextUser]));
-    const session = publicUser(nextUser);
-    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    setUser(session);
+    return () => unsub();
   }, []);
+
+  const signUp = useCallback(
+    async ({ name, email, password }: { name: string; email: string; password: string }) => {
+      const normalized = email.trim().toLowerCase();
+      if (!name.trim()) throw new Error('Name is required.');
+      if (!normalized.includes('@')) throw new Error('Enter a valid email.');
+      if (password.length < 6) throw new Error('Password must be at least 6 characters.');
+
+      try {
+        const auth = getFirebaseAuth();
+        const cred = await createUserWithEmailAndPassword(auth, normalized, password);
+        await updateProfile(cred.user, { displayName: name.trim() });
+        setUser(mapUser(cred.user, name.trim()));
+      } catch (e) {
+        throw new Error(friendlyAuthError(e));
+      }
+    },
+    [],
+  );
 
   const signIn = useCallback(async ({ email, password }: { email: string; password: string }) => {
     const normalized = email.trim().toLowerCase();
-    const users = await readUsers();
-    const match = users.find((u) => u.email === normalized);
-    if (!match) throw new Error('No account found for that email.');
-
-    const passwordHash = await hashPassword(password);
-    if (passwordHash !== match.passwordHash) {
-      throw new Error('Incorrect password.');
+    try {
+      const auth = getFirebaseAuth();
+      const cred = await signInWithEmailAndPassword(auth, normalized, password);
+      setUser(mapUser(cred.user));
+    } catch (e) {
+      throw new Error(friendlyAuthError(e));
     }
-
-    const session = publicUser(match);
-    await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    setUser(session);
   }, []);
 
   const signOut = useCallback(async () => {
-    await AsyncStorage.removeItem(SESSION_KEY);
-    setUser(null);
+    try {
+      await firebaseSignOut(getFirebaseAuth());
+      setUser(null);
+    } catch (e) {
+      throw new Error(friendlyAuthError(e));
+    }
   }, []);
 
   const value = useMemo(
@@ -108,20 +106,10 @@ export function useAuth() {
   return ctx;
 }
 
-async function readUsers(): Promise<StoredUser[]> {
-  const raw = await AsyncStorage.getItem(USERS_KEY);
-  if (!raw) return [];
-  try {
-    return JSON.parse(raw) as StoredUser[];
-  } catch {
-    return [];
-  }
-}
-
-async function hashPassword(password: string) {
-  return Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, `nest:${password}`);
-}
-
-function publicUser(user: StoredUser): User {
-  return { id: user.id, name: user.name, email: user.email };
+function mapUser(firebaseUser: FirebaseUser, fallbackName?: string): User {
+  return {
+    id: firebaseUser.uid,
+    name: firebaseUser.displayName || fallbackName || 'Nest user',
+    email: firebaseUser.email || '',
+  };
 }

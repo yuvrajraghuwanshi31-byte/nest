@@ -6,13 +6,35 @@ School + Craft todos in one place. Expo web app, built for MacBook and phone.
 
 ```bash
 npm install
-cp .env.example .env   # add your Craft API URL
+cp .env.example .env
 npm run web
 ```
 
-## Cloudflare
+Fill `.env` with Craft + Firebase values (see below).
 
-This repo deploys as a **Workers static assets** site (`wrangler deploy`).
+## Firebase Auth
+
+Accounts are stored in Firebase so you can sign in from any device.
+
+1. Open [Firebase Console](https://console.firebase.google.com/) → **Add project** (name it `nest`)
+2. Build → **Authentication** → **Get started** → enable **Email/Password**
+3. Project settings (gear) → **Your apps** → Web (`</>`) → register app `nest-web`
+4. Copy the config into `.env`:
+
+```
+EXPO_PUBLIC_FIREBASE_API_KEY=...
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+EXPO_PUBLIC_FIREBASE_APP_ID=...
+```
+
+5. Authentication → **Settings** → **Authorized domains** → add your Cloudflare domain (e.g. `nest.xxx.workers.dev`)
+
+Old local-only accounts will not carry over — create a new account after Firebase is connected.
+
+## Cloudflare
 
 | Setting | Value |
 |---|---|
@@ -20,12 +42,6 @@ This repo deploys as a **Workers static assets** site (`wrangler deploy`).
 | Deploy command | `npx wrangler deploy` |
 | Build output directory | `dist` |
 
-Environment variable (Production + Preview):
+Add the same `EXPO_PUBLIC_*` env vars (Craft + Firebase) in Cloudflare → Settings → Variables.
 
-```
-EXPO_PUBLIC_CRAFT_API_URL=https://connect.craft.do/links/YOUR_LINK/api/v1
-```
-
-Treat that Craft URL like a password.
-
-SPA routing is handled in `wrangler.jsonc` via `not_found_handling: "single-page-application"` (no `_redirects` file).
+SPA routing is handled in `wrangler.jsonc` via `not_found_handling: "single-page-application"`.
