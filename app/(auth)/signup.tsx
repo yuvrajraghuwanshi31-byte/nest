@@ -1,21 +1,22 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import { AuthShell } from '@/components/AuthShell';
 import { NestText } from '@/components/NestText';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
-import { colors } from '@/constants/theme';
+import { colors, fonts, space } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function SignupScreen() {
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const onSubmit = async () => {
     setLoading(true);
@@ -37,6 +38,17 @@ export default function SignupScreen() {
     }
   };
 
+  const onGoogle = async () => {
+    setGoogleLoading(true);
+    setError(null);
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not start Google sign-in.');
+      setGoogleLoading(false);
+    }
+  };
+
   return (
     <AuthShell
       title="Create your Nest"
@@ -49,6 +61,21 @@ export default function SignupScreen() {
           </Link>
         </NestText>
       }>
+      <Button
+        label={googleLoading ? 'Opening Google…' : 'Continue with Google'}
+        variant="secondary"
+        onPress={onGoogle}
+        disabled={loading || googleLoading}
+      />
+
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <NestText variant="meta" style={styles.dividerText}>
+          or email
+        </NestText>
+        <View style={styles.dividerLine} />
+      </View>
+
       <TextField
         label="Name"
         autoComplete="name"
@@ -81,7 +108,7 @@ export default function SignupScreen() {
       <Button
         label={loading ? 'Creating…' : 'Create account'}
         onPress={onSubmit}
-        disabled={loading}
+        disabled={loading || googleLoading}
       />
     </AuthShell>
   );
@@ -97,5 +124,20 @@ const styles = StyleSheet.create({
   link: {
     color: colors.leaf,
     fontWeight: '700',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    marginVertical: space.xxs,
+  },
+  dividerLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.lineStrong,
+  },
+  dividerText: {
+    color: colors.inkSoft,
+    fontFamily: fonts.bodyMedium,
   },
 });

@@ -1,7 +1,7 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, router } from 'expo-router';
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   useWindowDimensions,
@@ -9,18 +9,30 @@ import {
 } from 'react-native';
 import Animated, {
   Extrapolation,
+  FadeIn,
   interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
+  withRepeat,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
+import { useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { FocusBlock, FocusLine, StickyScene } from '@/components/landing/ScrollFocus';
+import { ProductPreview } from '@/components/landing/ProductPreview';
+import {
+  Enter,
+  FocusLine,
+  ParallaxLayer,
+  Reveal,
+  StickyScene,
+} from '@/components/landing/ScrollFocus';
 import { NestLogo } from '@/components/NestLogo';
 import { NestText } from '@/components/NestText';
 import { Button } from '@/components/ui/Button';
-import { colors, fonts, layout, radius, space, type } from '@/constants/theme';
+import { colors, fonts, layout, radius, space } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function LandingScreen() {
@@ -28,15 +40,26 @@ export default function LandingScreen() {
   const insets = useSafeAreaInsets();
   const { height: vh, width } = useWindowDimensions();
   const scrollY = useSharedValue(0);
+  const scrollHint = useSharedValue(0);
   const wide = width >= layout.breakpoint;
 
-  const navH = insets.top + 56;
-  // Shorter sticky runways = continuous scroll, less waiting between beats
-  const sceneOneStart = vh;
-  const sceneOneScreens = 1.35;
+  const navH = insets.top + 60;
+  const heroH = Math.max(vh - navH * 0.2, wide ? 720 : 640);
+
+  // Sticky runways
+  const sceneOneStart = heroH + navH * 0.5;
+  const sceneOneScreens = 1.5;
   const sceneTwoStart = sceneOneStart + vh * sceneOneScreens;
-  const sceneTwoScreens = 1.7;
+  const sceneTwoScreens = 1.85;
   const afterSticky = sceneTwoStart + vh * sceneTwoScreens;
+
+  useEffect(() => {
+    scrollHint.value = withRepeat(
+      withTiming(1, { duration: 1400, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
+  }, [scrollHint]);
 
   const onScroll = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -47,21 +70,27 @@ export default function LandingScreen() {
   const heroStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
-      [0, vh * 0.35, vh * 0.65],
-      [1, 0.7, 0],
+      [0, vh * 0.4, vh * 0.75],
+      [1, 0.55, 0],
       Extrapolation.CLAMP,
     );
-    const translateY = interpolate(scrollY.value, [0, vh * 0.65], [0, -24], Extrapolation.CLAMP);
+    const translateY = interpolate(scrollY.value, [0, vh * 0.75], [0, -48], Extrapolation.CLAMP);
+    const scale = interpolate(scrollY.value, [0, vh * 0.75], [1, 0.97], Extrapolation.CLAMP);
     return {
       opacity,
-      transform: [{ translateY }],
+      transform: [{ translateY }, { scale }],
     };
   });
 
   const navStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(scrollY.value, [0, 28], [0, 1], Extrapolation.CLAMP);
+    const opacity = interpolate(scrollY.value, [0, 40], [0, 1], Extrapolation.CLAMP);
     return { opacity };
   });
+
+  const hintStyle = useAnimatedStyle(() => ({
+    opacity: 0.35 + scrollHint.value * 0.45,
+    transform: [{ translateY: scrollHint.value * 6 }],
+  }));
 
   if (!ready) {
     return (
@@ -75,112 +104,148 @@ export default function LandingScreen() {
 
   return (
     <View style={styles.root}>
+      {/* Atmosphere */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <LinearGradient
+          colors={['#0E1410', colors.mistDeep, '#050505']}
+          locations={[0, 0.45, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+        <ParallaxLayer scrollY={scrollY} speed={0.18} style={styles.orbWrap}>
+          <View style={[styles.orb, styles.orbA]} />
+          <View style={[styles.orb, styles.orbB]} />
+        </ParallaxLayer>
+      </View>
+
+      {/* Nav */}
       <View style={[styles.nav, { paddingTop: insets.top + space.xs }]}>
         <Animated.View style={[styles.navBg, navStyle]} />
-        <NestLogo size={28} />
+        <NestLogo size={30} />
         <View style={styles.navActions}>
-          <Pressable onPress={() => router.push('/login')} hitSlop={8}>
+          <Pressable onPress={() => router.push('/login')} hitSlop={10}>
             <NestText variant="meta" style={styles.navLink}>
               Sign in
             </NestText>
           </Pressable>
-          <Button label="Get Nest" onPress={() => router.push('/signup')} style={styles.navCta} />
+          {wide ? (
+            <Button label="Get Nest" onPress={() => router.push('/signup')} style={styles.navCta} />
+          ) : null}
         </View>
       </View>
 
       <Animated.ScrollView
-        style={styles.root}
-        contentContainerStyle={{ paddingBottom: insets.bottom + space.xl }}
+        style={styles.scroll}
+        contentContainerStyle={{ paddingBottom: insets.bottom + space.xxl }}
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
         onScroll={onScroll}>
-        <View style={{ height: navH }} />
-
-        <View style={[styles.hero, { minHeight: Math.min(vh - navH, 640), paddingBottom: space.xxl }]}>
-          <Animated.View style={[styles.heroInner, heroStyle]}>
-            <Image
-              source={require('../assets/images/nest-logo.png')}
-              style={styles.heroLogo}
-              resizeMode="cover"
-              accessibilityLabel="Nest"
-            />
-            <NestText variant="brand" style={styles.brand}>
-              Nest
-            </NestText>
-            <NestText variant="title" style={styles.headline}>
-              Know what to do next.
-            </NestText>
-            <NestText variant="subtitle" style={styles.support}>
-              Schoolwork and Craft todos, ranked into one calm list.
-            </NestText>
-            <View style={styles.actions}>
-              <Button
-                label="Create account"
-                onPress={() => router.push('/signup')}
-                style={styles.cta}
-              />
-              <Button
-                label="Sign in"
-                variant="secondary"
-                onPress={() => router.push('/login')}
-                style={styles.cta}
-              />
+        {/* —— Hero —— */}
+        <View style={[styles.hero, { minHeight: heroH, paddingTop: navH + space.md }]}>
+          <Animated.View style={[styles.heroGrid, wide && styles.heroGridWide, heroStyle]}>
+            <View style={[styles.heroCopy, wide && styles.heroCopyWide]}>
+              <Enter delay={40}>
+                <NestLogo size={wide ? 56 : 48} showWordmark={false} />
+              </Enter>
+              <Enter delay={120}>
+                <NestText variant="brand" style={[styles.brand, wide && styles.brandWide]}>
+                  Nest
+                </NestText>
+              </Enter>
+              <Enter delay={220}>
+                <NestText variant="title" style={[styles.headline, wide && styles.headlineWide]}>
+                  Know what to do next.
+                </NestText>
+              </Enter>
+              <Enter delay={320}>
+                <NestText variant="subtitle" style={styles.support}>
+                  Schoolwork and Craft todos, ranked into one calm list for your MacBook and phone.
+                </NestText>
+              </Enter>
+              <Enter delay={420}>
+                <View style={styles.actions}>
+                  <Button
+                    label="Create account"
+                    onPress={() => router.push('/signup')}
+                    style={styles.cta}
+                  />
+                  <Button
+                    label="Sign in"
+                    variant="secondary"
+                    onPress={() => router.push('/login')}
+                    style={styles.cta}
+                  />
+                </View>
+              </Enter>
             </View>
-            <NestText variant="meta" style={styles.scrollHint}>
+
+            <Enter delay={380} style={wide ? styles.previewCol : styles.previewColMobile}>
+              <ProductPreview wide={wide} />
+            </Enter>
+          </Animated.View>
+
+          <Animated.View style={[styles.scrollHint, hintStyle]}>
+            <NestText variant="meta" style={styles.scrollHintText}>
               Scroll
             </NestText>
+            <View style={styles.scrollLine} />
           </Animated.View>
         </View>
 
+        {/* —— Sticky: one place —— */}
         <StickyScene scrollY={scrollY} start={sceneOneStart} screens={sceneOneScreens}>
           {(progress) => (
             <View style={styles.stickyInner}>
-              <FocusLine progress={progress} from={0.0} to={0.4}>
+              <FocusLine progress={progress} from={0} to={0.38}>
                 <NestText variant="label" style={styles.focusLabel}>
                   One place
                 </NestText>
               </FocusLine>
-              <FocusLine progress={progress} from={0.06} to={0.55}>
-                <NestText variant="title" style={[styles.focusTitle, wide && styles.focusTitleWide]}>
+              <FocusLine progress={progress} from={0.05} to={0.52}>
+                <NestText
+                  variant="title"
+                  style={[styles.focusTitle, wide && styles.focusTitleWide]}>
                   Schoology and Craft,{'\n'}finally together.
                 </NestText>
               </FocusLine>
-              <FocusLine progress={progress} from={0.22} to={0.78}>
+              <FocusLine progress={progress} from={0.2} to={0.75}>
                 <NestText variant="subtitle" style={styles.focusBody}>
-                  Stop bouncing between tabs. Nest pulls everything into a single focus list for
-                  your MacBook and phone.
+                  Stop bouncing between tabs. Nest pulls assignments and todos into a single focus
+                  list — ready on your laptop, the same on your phone.
                 </NestText>
               </FocusLine>
             </View>
           )}
         </StickyScene>
 
+        {/* —— Sticky: plain words —— */}
         <StickyScene scrollY={scrollY} start={sceneTwoStart} screens={sceneTwoScreens}>
           {(progress) => (
             <View style={styles.stickyInner}>
-              <FocusLine progress={progress} from={0.0} to={0.3}>
+              <FocusLine progress={progress} from={0} to={0.28}>
                 <NestText variant="label" style={styles.focusLabel}>
                   In plain words
                 </NestText>
               </FocusLine>
-              <FocusLine progress={progress} from={0.04} to={0.32}>
-                <NestText variant="title" style={[styles.focusTitle, wide && styles.focusTitleWide]}>
+              <FocusLine progress={progress} from={0.04} to={0.3}>
+                <NestText
+                  variant="title"
+                  style={[styles.focusTitle, wide && styles.focusTitleWide]}>
                   It tells you what to do.
                 </NestText>
               </FocusLine>
 
               <View style={styles.stack}>
-                <FocusLine progress={progress} from={0.2} to={0.5}>
+                <FocusLine progress={progress} from={0.18} to={0.48}>
                   <NestText variant="body" style={styles.stackLine}>
                     Finish the lab report.
                   </NestText>
                 </FocusLine>
-                <FocusLine progress={progress} from={0.38} to={0.68}>
+                <FocusLine progress={progress} from={0.36} to={0.66}>
                   <NestText variant="body" style={styles.stackLine}>
                     Outline the DBQ.
                   </NestText>
                 </FocusLine>
-                <FocusLine progress={progress} from={0.56} to={0.88}>
+                <FocusLine progress={progress} from={0.54} to={0.88}>
                   <NestText variant="body" style={styles.stackLine}>
                     Clear your Craft inbox.
                   </NestText>
@@ -190,23 +255,29 @@ export default function LandingScreen() {
           )}
         </StickyScene>
 
+        {/* —— After sticky —— */}
         <View style={styles.after}>
-          <FocusBlock scrollY={scrollY} start={afterSticky + 20} fadeOut={false}>
-            <NestText variant="label">Connected</NestText>
+          <Reveal scrollY={scrollY} start={afterSticky + 40} fadeOut={false}>
+            <NestText variant="label" style={styles.focusLabel}>
+              Connected
+            </NestText>
             <NestText variant="title" style={styles.sectionTitle}>
               Craft is live. Schoology is next.
             </NestText>
             <NestText variant="subtitle" style={styles.sectionBody}>
-              Your Craft tasks already sync into Nest. Mark one done here and it updates in Craft.
+              Your Craft tasks already sync into Nest. Mark one done here and it updates there —
+              one place to act.
             </NestText>
-          </FocusBlock>
+          </Reveal>
 
-          <FocusBlock
+          <Reveal
             scrollY={scrollY}
-            start={afterSticky + vh * 0.32}
+            start={afterSticky + vh * 0.28}
             fadeOut={false}
             style={styles.closing}>
-            <NestLogo size={40} showWordmark={false} />
+            <Animated.View entering={FadeIn.duration(600)}>
+              <NestLogo size={44} showWordmark={false} />
+            </Animated.View>
             <NestText variant="title" style={styles.closingTitle}>
               Build your Nest.
             </NestText>
@@ -218,7 +289,7 @@ export default function LandingScreen() {
               onPress={() => router.push('/signup')}
               style={styles.closingCta}
             />
-          </FocusBlock>
+          </Reveal>
         </View>
       </Animated.ScrollView>
     </View>
@@ -228,13 +299,37 @@ export default function LandingScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.mist,
+    backgroundColor: colors.mistDeep,
+  },
+  scroll: {
+    flex: 1,
   },
   loading: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.mist,
+    backgroundColor: colors.mistDeep,
+  },
+  orbWrap: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  orb: {
+    position: 'absolute',
+    borderRadius: 999,
+  },
+  orbA: {
+    width: 420,
+    height: 420,
+    top: -80,
+    right: -120,
+    backgroundColor: 'rgba(111, 168, 135, 0.14)',
+  },
+  orbB: {
+    width: 320,
+    height: 320,
+    top: 220,
+    left: -140,
+    backgroundColor: 'rgba(91, 164, 208, 0.08)',
   },
   nav: {
     position: 'absolute',
@@ -243,14 +338,14 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 20,
     paddingHorizontal: space.lg,
-    paddingBottom: space.xs,
+    paddingBottom: space.sm,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   navBg: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: colors.mistDeep,
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(5, 5, 5, 0.88)',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.line,
   },
@@ -269,38 +364,58 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   hero: {
-    justifyContent: 'center',
     paddingHorizontal: space.lg,
-    maxWidth: layout.maxWidth,
-    width: '100%',
-    alignSelf: 'center',
+    justifyContent: 'center',
+    position: 'relative',
   },
-  heroInner: {
+  heroGrid: {
+    width: '100%',
+    maxWidth: layout.maxWidth,
+    alignSelf: 'center',
+    gap: space.xxl,
+  },
+  heroGridWide: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: space.section,
+  },
+  heroCopy: {
     gap: space.sm,
     maxWidth: 520,
   },
-  heroLogo: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.lg,
-    marginBottom: space.xxs,
-  },
-  brand: {
-    fontSize: 48,
-    lineHeight: 50,
-    letterSpacing: -1,
-    color: colors.ink,
-  },
-  headline: {
-    fontSize: 38,
-    lineHeight: 42,
-    letterSpacing: -0.7,
-    color: colors.ink,
+  heroCopyWide: {
+    flex: 1,
     maxWidth: 480,
   },
+  brand: {
+    fontSize: 64,
+    lineHeight: 66,
+    letterSpacing: -1.6,
+    color: colors.ink,
+    marginTop: space.xs,
+  },
+  brandWide: {
+    fontSize: 80,
+    lineHeight: 82,
+    letterSpacing: -2,
+  },
+  headline: {
+    fontSize: 28,
+    lineHeight: 34,
+    letterSpacing: -0.5,
+    color: colors.ink,
+    maxWidth: 420,
+    marginTop: space.xs,
+  },
+  headlineWide: {
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: -0.7,
+  },
   support: {
-    fontSize: type.subtitle.size,
-    lineHeight: 22,
+    fontSize: 16,
+    lineHeight: 24,
     color: colors.inkMuted,
     maxWidth: 400,
     marginTop: space.xxs,
@@ -309,16 +424,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: space.xs,
-    marginTop: space.sm,
+    marginTop: space.md,
   },
   cta: {
-    minWidth: 136,
+    minWidth: 140,
+  },
+  previewCol: {
+    flexShrink: 0,
+  },
+  previewColMobile: {
+    marginTop: space.md,
+    alignSelf: 'stretch',
   },
   scrollHint: {
-    marginTop: space.lg,
+    position: 'absolute',
+    bottom: space.xl,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    gap: space.xs,
+  },
+  scrollHintText: {
     color: colors.inkSoft,
-    letterSpacing: 1.4,
+    letterSpacing: 2,
     textTransform: 'uppercase',
+    fontSize: 11,
+  },
+  scrollLine: {
+    width: 1,
+    height: 28,
+    backgroundColor: colors.leaf,
+    opacity: 0.7,
   },
   stickyInner: {
     maxWidth: layout.maxWidth,
@@ -330,64 +466,67 @@ const styles = StyleSheet.create({
     color: colors.leaf,
   },
   focusTitle: {
-    fontSize: 34,
-    lineHeight: 38,
-    letterSpacing: -0.6,
+    fontSize: 36,
+    lineHeight: 40,
+    letterSpacing: -0.7,
     maxWidth: 640,
   },
   focusTitleWide: {
-    fontSize: 44,
-    lineHeight: 48,
-    letterSpacing: -0.8,
+    fontSize: 52,
+    lineHeight: 56,
+    letterSpacing: -1.1,
   },
   focusBody: {
-    fontSize: 15,
-    lineHeight: 22,
-    maxWidth: 460,
+    fontSize: 16,
+    lineHeight: 24,
+    maxWidth: 480,
+    color: colors.inkMuted,
   },
   stack: {
-    marginTop: space.md,
-    gap: space.sm,
+    marginTop: space.lg,
+    gap: space.md,
   },
   stackLine: {
     fontFamily: fonts.display,
-    fontSize: 28,
-    lineHeight: 32,
-    letterSpacing: -0.4,
+    fontSize: 30,
+    lineHeight: 36,
+    letterSpacing: -0.5,
     color: colors.ink,
   },
   after: {
     paddingHorizontal: space.lg,
-    paddingTop: space.xl,
+    paddingTop: space.xxl,
     gap: space.section,
     maxWidth: layout.maxWidth,
     width: '100%',
     alignSelf: 'center',
   },
   sectionTitle: {
-    fontSize: 28,
-    lineHeight: 32,
-    letterSpacing: -0.4,
+    fontSize: 30,
+    lineHeight: 36,
+    letterSpacing: -0.5,
     maxWidth: 560,
     marginTop: space.xs,
   },
   sectionBody: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 16,
+    lineHeight: 24,
     maxWidth: 480,
     marginTop: space.xs,
+    color: colors.inkMuted,
   },
   closing: {
     gap: space.sm,
     paddingBottom: space.xxl,
+    paddingTop: space.lg,
   },
   closingTitle: {
-    fontSize: 32,
-    lineHeight: 36,
-    letterSpacing: -0.5,
+    fontSize: 36,
+    lineHeight: 40,
+    letterSpacing: -0.7,
   },
   closingCta: {
-    marginTop: space.xs,
-    minWidth: 160,
+    marginTop: space.sm,
+    minWidth: 168,
   },
 });

@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { Platform } from 'react-native';
 
 import { isSupabaseConfigured, supabase } from './supabase';
 
@@ -21,6 +22,7 @@ type AuthContextValue = {
   ready: boolean;
   signUp: (input: { name: string; email: string; password: string }) => Promise<void>;
   signIn: (input: { email: string; password: string }) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -73,7 +75,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
 
-      if (error) throw new Error(error.message);
+      if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes('rate limit') || msg.includes('email rate')) {
+          throw new Error(
+            'Too many signup emails sent. Wait a few minutes, or turn off Confirm email in Supabase → Authentication → Providers → Email.',
+          );
+        }
+        throw new Error(error.message);
+      }
 
       // If email confirmation is required, there may be no session yet.
       if (!data.session) {
@@ -102,6 +112,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await loadUser(data.user));
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    if (!isSupabaseConfigured) {
+      throw new Error('Supabase is not configured. Check .env and restart the app.');
+    }
+
+    const redirectTo =
+      Platform.OS === 'web' && typeof window !== 'undefined'
+        ? `${window.location.origin}/home`
+        : 'nest://home';
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    });
+
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes('provider is not enabled') || msg.includes('unsupported provider')) {
+        throw new Error(
+          'Google sign-in is not enabled yet in Supabase. Turn on Google under Authentication → Providers, add Client ID + Secret, and Save.',
+        );
+      }
+      throw new Error(error.message);
+    }
+
+    // Web: browser navigates to Google. Native would use data.url with WebBrowser.
+    if (Platform.OS !== 'web' && data.url) {
+      throw new Error('Open this URL to continue Google sign-in: ' + data.url);
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw new Error(error.message);
@@ -109,8 +156,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, ready, signUp, signIn, signOut }),
-    [user, ready, signUp, signIn, signOut],
+    () => ({ user, ready, signUp, signIn, signInWithGoogle, signOut }),
+    [user, ready, signUp, signIn, signInWithGoogle, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -131,11 +178,13 @@ type AuthUser = {
 async function loadUser(user: AuthUser | null): Promise<User | null> {
   if (!user) return null;
 
-  const metaName = user.user_metadata?.name;
-  let name =
-    typeof metaName === 'string' && metaName.trim()
-      ? metaName.trim()
-      : user.email?.split('@')[0] || 'Nest user';
+  const meta = user.user_metadata ?? {};
+  const metaName =
+    (typeof meta.full_name === 'string' && meta.full_name) ||
+    (typeof meta.name === 'string' && meta.name) ||
+    (typeof meta.given_name === 'string' && meta.given_name) ||
+    '';
+  let name = metaName.trim() || user.email?.split('@')[0] || 'Nest user';
 
   const { data: profile } = await supabase
     .from('profiles')

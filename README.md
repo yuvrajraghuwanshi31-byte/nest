@@ -40,4 +40,6 @@ vercel --prod
 
 Treat the Craft API URL like a password. Do not add Supabase secret keys to the frontend.
 
+Firebase Analytics (optional web tracking) uses the `EXPO_PUBLIC_FIREBASE_*` vars. Auth still runs on Supabase.
+
 Expo static export generates an HTML file per route in `dist`, so deep links like `/signup` and `/home` work with Vercel `cleanUrls`.

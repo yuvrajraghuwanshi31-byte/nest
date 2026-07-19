@@ -1,20 +1,21 @@
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AuthShell } from '@/components/AuthShell';
 import { NestText } from '@/components/NestText';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
-import { colors } from '@/constants/theme';
+import { colors, fonts, space } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function LoginScreen() {
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const onSubmit = async () => {
     setLoading(true);
@@ -26,6 +27,17 @@ export default function LoginScreen() {
       setError(e instanceof Error ? e.message : 'Could not sign in.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onGoogle = async () => {
+    setGoogleLoading(true);
+    setError(null);
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not start Google sign-in.');
+      setGoogleLoading(false);
     }
   };
 
@@ -41,6 +53,21 @@ export default function LoginScreen() {
           </Link>
         </NestText>
       }>
+      <Button
+        label={googleLoading ? 'Opening Google…' : 'Continue with Google'}
+        variant="secondary"
+        onPress={onGoogle}
+        disabled={loading || googleLoading}
+      />
+
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <NestText variant="meta" style={styles.dividerText}>
+          or email
+        </NestText>
+        <View style={styles.dividerLine} />
+      </View>
+
       <TextField
         label="Email"
         autoCapitalize="none"
@@ -63,7 +90,7 @@ export default function LoginScreen() {
           {error}
         </NestText>
       ) : null}
-      <Button label={loading ? 'Signing in…' : 'Sign in'} onPress={onSubmit} disabled={loading} />
+      <Button label={loading ? 'Signing in…' : 'Sign in'} onPress={onSubmit} disabled={loading || googleLoading} />
     </AuthShell>
   );
 }
@@ -78,5 +105,20 @@ const styles = StyleSheet.create({
   link: {
     color: colors.leaf,
     fontWeight: '700',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    marginVertical: space.xxs,
+  },
+  dividerLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.lineStrong,
+  },
+  dividerText: {
+    color: colors.inkSoft,
+    fontFamily: fonts.bodyMedium,
   },
 });

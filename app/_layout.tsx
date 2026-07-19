@@ -15,6 +15,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/lib/AuthContext';
+import { initFirebaseAnalytics } from '@/lib/firebase';
 import { TasksProvider } from '@/lib/TasksContext';
 
 export { ErrorBoundary } from 'expo-router';
@@ -37,6 +38,10 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) SplashScreen.hideAsync();
   }, [loaded]);
+
+  useEffect(() => {
+    void initFirebaseAnalytics();
+  }, []);
 
   if (!loaded) return null;
 
