@@ -16,17 +16,17 @@ export default function TabLayout() {
         <Tabs
           screenOptions={{
             headerShown: false,
-            tabBarActiveTintColor: colors.ink,
+            tabBarActiveTintColor: colors.leaf,
             tabBarInactiveTintColor: colors.inkSoft,
             tabBarStyle: wide
               ? { display: 'none' }
               : {
-                  backgroundColor: colors.mistDeep,
+                  backgroundColor: colors.surfaceRaised,
                   borderTopColor: colors.line,
                   borderTopWidth: StyleSheet.hairlineWidth,
-                  height: 58,
-                  paddingTop: 4,
-                  paddingBottom: 4,
+                  height: 62,
+                  paddingTop: 6,
+                  paddingBottom: 6,
                 },
             tabBarLabelStyle: {
               fontFamily: fonts.bodyMedium,
@@ -40,7 +40,7 @@ export default function TabLayout() {
           <Tabs.Screen
             name="home"
             options={{
-              title: 'Next',
+              title: 'Focus',
               tabBarIcon: ({ color }) => <TabIcon name="next" color={color} />,
             }}
           />
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: colors.mistDeep,
+    backgroundColor: colors.mist,
   },
   main: {
     flex: 1,

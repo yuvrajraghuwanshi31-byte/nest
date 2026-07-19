@@ -44,7 +44,7 @@ export default function LoginScreen() {
   return (
     <AuthShell
       title="Welcome back"
-      subtitle="Sign in to see what you need to do next."
+      subtitle="Pick up your focus list where you left off."
       footer={
         <View style={styles.footerRow}>
           <NestText variant="meta" style={styles.footerText}>

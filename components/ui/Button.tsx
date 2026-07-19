@@ -43,17 +43,17 @@ export function Button({ label, onPress, variant = 'primary', disabled, style }:
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 44,
-    paddingHorizontal: space.md,
+    minHeight: 48,
+    paddingHorizontal: space.lg,
     borderRadius: radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primary: {
-    backgroundColor: colors.ink,
+    backgroundColor: colors.leaf,
   },
   secondary: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceRaised,
     borderWidth: 1,
     borderColor: colors.lineStrong,
   },
@@ -61,14 +61,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   dim: {
-    opacity: 0.65,
+    opacity: 0.7,
   },
   label: {
     fontFamily: fonts.bodyBold,
-    fontSize: 14,
+    fontSize: 15,
   },
   labelOnPrimary: {
-    color: colors.black,
+    color: colors.white,
   },
   labelOnSecondary: {
     color: colors.ink,

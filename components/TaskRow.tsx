@@ -2,8 +2,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { NestText } from '@/components/NestText';
-import { colors, fonts, layout, radius, space } from '@/constants/theme';
+import { colors, fonts, layout, radius, shadow, space } from '@/constants/theme';
 import { formatDue, type RankedTask } from '@/lib/rankTasks';
+import { sx } from '@/lib/sx';
 
 type Props = {
   task: RankedTask;
@@ -24,7 +25,7 @@ export function TaskRow({ task, index, onComplete, showReason = true }: Props) {
     <Animated.View entering={FadeInDown.delay(index * 40).springify().damping(20)}>
       <Pressable
         onPress={() => onComplete(task.id)}
-        style={({ pressed }) => StyleSheet.flatten([styles.row, pressed && styles.pressed])}>
+        style={({ pressed }) => sx(styles.row, pressed && styles.pressed)}>
         <View style={styles.checkWrap}>
           <View style={styles.check} />
         </View>
@@ -41,7 +42,7 @@ export function TaskRow({ task, index, onComplete, showReason = true }: Props) {
           </View>
 
           <NestText variant="body" style={styles.title}>
-            {index + 1}. {task.title}
+            {task.title}
           </NestText>
 
           {showReason ? (
@@ -64,43 +65,46 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: space.sm,
+    gap: space.md,
     minHeight: layout.rowMinHeight,
-    paddingVertical: space.sm,
-    paddingHorizontal: space.sm,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
+    paddingVertical: space.md,
+    paddingHorizontal: space.md,
+    borderRadius: radius.lg,
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
     borderColor: colors.line,
-    marginBottom: space.xs,
+    marginBottom: space.sm,
+    ...shadow.soft,
   },
   pressed: {
     backgroundColor: colors.surfaceHover,
+    transform: [{ scale: 0.995 }],
   },
   checkWrap: {
     paddingTop: 2,
   },
   check: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 1.5,
     borderColor: colors.leaf,
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: colors.leafSoft,
   },
   content: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   topLine: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: space.xs,
-    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: space.sm,
   },
   title: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 15,
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 22,
+    color: colors.ink,
   },
 });

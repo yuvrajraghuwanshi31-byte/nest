@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { NestText } from '@/components/NestText';
-import { colors, fonts, radius, space } from '@/constants/theme';
+import { colors, fonts, radius, shadow, space } from '@/constants/theme';
 import { sx } from '@/lib/sx';
 
 const TASKS = [
@@ -20,7 +20,7 @@ const TASKS = [
   { title: 'Clear Craft inbox', meta: '3 open · personal', tone: colors.leaf },
 ] as const;
 
-/** Visual product mock — the Nest focus list, as atmosphere. */
+/** Product mock shown on the landing hero. */
 export function ProductPreview({ wide }: { wide?: boolean }) {
   const pulse = useSharedValue(0);
 
@@ -29,8 +29,8 @@ export function ProductPreview({ wide }: { wide?: boolean }) {
       900,
       withRepeat(
         withSequence(
-          withTiming(1, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
+          withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
         ),
         -1,
         false,
@@ -39,7 +39,7 @@ export function ProductPreview({ wide }: { wide?: boolean }) {
   }, [pulse]);
 
   const glowStyle = useAnimatedStyle(() => ({
-    opacity: 0.35 + pulse.value * 0.25,
+    opacity: 0.25 + pulse.value * 0.35,
   }));
 
   return (
@@ -51,15 +51,13 @@ export function ProductPreview({ wide }: { wide?: boolean }) {
           <View style={sx(styles.dot, styles.dotMid)} />
           <View style={sx(styles.dot, styles.dotEnd)} />
           <NestText variant="meta" style={styles.chromeLabel}>
-            Do this next
+            Focus
           </NestText>
         </View>
 
-        <NestText variant="label" style={styles.label}>
-          In plain words
-        </NestText>
+        <NestText variant="label">In plain words</NestText>
         <NestText variant="body" style={styles.brief}>
-          You need to finish the lab report, outline the DBQ, and clear Craft.
+          Finish the lab report, outline the DBQ, then clear Craft.
         </NestText>
 
         <View style={styles.list}>
@@ -89,27 +87,28 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   wrapWide: {
-    maxWidth: 440,
+    maxWidth: 460,
   },
   glow: {
     position: 'absolute',
-    top: '12%',
-    left: '8%',
-    right: '8%',
-    bottom: '8%',
-    backgroundColor: colors.leafDeep,
+    top: '10%',
+    left: '6%',
+    right: '6%',
+    bottom: '6%',
+    backgroundColor: colors.leaf,
     borderRadius: radius.xl,
-    opacity: 0.4,
-    transform: [{ scale: 1.06 }],
+    opacity: 0.3,
+    transform: [{ scale: 1.04 }],
   },
   frame: {
-    backgroundColor: colors.mistDeep,
+    backgroundColor: colors.surfaceRaised,
     borderRadius: radius.xl,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.lineStrong,
+    borderWidth: 1,
+    borderColor: colors.line,
     padding: space.lg,
     gap: space.sm,
     overflow: 'hidden',
+    ...shadow.lift,
   },
   chrome: {
     flexDirection: 'row',
@@ -132,22 +131,19 @@ const styles = StyleSheet.create({
   chromeLabel: {
     marginLeft: 'auto',
     color: colors.inkSoft,
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
-  },
-  label: {
-    color: colors.leaf,
   },
   brief: {
     fontFamily: fonts.display,
-    fontSize: 20,
-    lineHeight: 26,
-    letterSpacing: -0.3,
+    fontSize: 22,
+    lineHeight: 28,
+    letterSpacing: -0.4,
     color: colors.ink,
     marginBottom: space.xs,
   },
   list: {
-    gap: space.xs,
+    gap: 0,
   },
   row: {
     flexDirection: 'row',
@@ -163,6 +159,7 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     borderWidth: 1.5,
     marginTop: 2,
+    backgroundColor: colors.surfaceHover,
   },
   rowText: {
     flex: 1,

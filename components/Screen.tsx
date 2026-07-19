@@ -13,8 +13,8 @@ export function Screen({ children, scroll = true }: { children: ReactNode; scrol
   const body = (
     <View
       style={sx(styles.inner, {
-        paddingTop: wide ? space.xl : insets.top + space.md,
-        paddingBottom: wide ? space.xl : insets.bottom + 80,
+        paddingTop: wide ? space.xxl : insets.top + space.lg,
+        paddingBottom: wide ? space.xxl : insets.bottom + 88,
         maxWidth: layout.maxWidth,
       })}>
       {children}
@@ -46,6 +46,6 @@ const styles = StyleSheet.create({
   inner: {
     width: '100%',
     paddingHorizontal: layout.contentPad,
-    gap: space.md,
+    gap: space.lg,
   },
 });

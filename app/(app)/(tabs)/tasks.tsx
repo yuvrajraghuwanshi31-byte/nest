@@ -23,10 +23,10 @@ export default function TasksScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <NestText variant="label">Everything</NestText>
-        <NestText variant="title">All tasks in one place</NestText>
+        <NestText variant="label">Library</NestText>
+        <NestText variant="title">All tasks</NestText>
         <NestText variant="subtitle">
-          Schoology assignments and Craft todos, merged and sorted by what matters.
+          Everything in one place, sorted by what matters most.
         </NestText>
       </View>
 
@@ -59,7 +59,9 @@ export default function TasksScreen() {
           <TaskRow key={task.id} task={task} index={index} onComplete={completeTask} />
         ))}
         {filtered.length === 0 ? (
-          <NestText variant="subtitle">No open tasks in this filter.</NestText>
+          <View style={styles.empty}>
+            <NestText variant="subtitle">No open tasks in this view.</NestText>
+          </View>
         ) : null}
       </View>
     </Screen>
@@ -76,22 +78,26 @@ const styles = StyleSheet.create({
     gap: space.xs,
   },
   chip: {
-    paddingHorizontal: space.sm,
-    paddingVertical: space.xs,
-    borderRadius: radius.md,
-    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    borderRadius: radius.pill,
+    borderWidth: 1,
     borderColor: colors.line,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceRaised,
   },
   chipActive: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
+    backgroundColor: colors.leaf,
+    borderColor: colors.leaf,
   },
   chipText: {
     fontFamily: fonts.bodyMedium,
     color: colors.inkMuted,
   },
   chipTextActive: {
-    color: colors.black,
+    color: colors.white,
+    fontFamily: fonts.bodyBold,
+  },
+  empty: {
+    paddingVertical: space.xl,
   },
 });

@@ -19,13 +19,13 @@ module.exports = ({ config }) => ({
   orientation: 'default',
   icon: './assets/images/nest-logo.png',
   scheme: 'nest',
-  userInterfaceStyle: 'dark',
+  userInterfaceStyle: 'light',
   ios: {
     supportsTablet: true,
   },
   android: {
     adaptiveIcon: {
-      backgroundColor: '#0A0A0A',
+      backgroundColor: '#F4F1EB',
       foregroundImage: './assets/images/nest-logo.png',
     },
     predictiveBackGestureEnabled: false,
@@ -42,7 +42,7 @@ module.exports = ({ config }) => ({
       {
         image: './assets/images/nest-logo.png',
         resizeMode: 'contain',
-        backgroundColor: '#0A0A0A',
+        backgroundColor: '#F4F1EB',
       },
     ],
   ],

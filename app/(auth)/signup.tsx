@@ -52,7 +52,7 @@ export default function SignupScreen() {
   return (
     <AuthShell
       title="Create your Nest"
-      subtitle="One account for Schoology, Craft, and your daily focus list."
+      subtitle="One account for school, Craft, and your daily focus list."
       footer={
         <View style={styles.footerRow}>
           <NestText variant="meta" style={styles.footerText}>

@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { Redirect, router } from 'expo-router';
+import { useEffect } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -8,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import Animated, {
+  Easing,
   Extrapolation,
   FadeIn,
   interpolate,
@@ -16,9 +18,7 @@ import Animated, {
   useSharedValue,
   withRepeat,
   withTiming,
-  Easing,
 } from 'react-native-reanimated';
-import { useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProductPreview } from '@/components/landing/ProductPreview';
@@ -44,14 +44,13 @@ export default function LandingScreen() {
   const scrollHint = useSharedValue(0);
   const wide = width >= layout.breakpoint;
 
-  const navH = insets.top + 60;
-  const heroH = Math.max(vh - navH * 0.2, wide ? 720 : 640);
+  const navH = insets.top + 64;
+  const heroH = Math.max(vh - navH * 0.15, wide ? 700 : 620);
 
-  // Sticky runways
-  const sceneOneStart = heroH + navH * 0.5;
-  const sceneOneScreens = 1.5;
+  const sceneOneStart = heroH + navH * 0.4;
+  const sceneOneScreens = 1.45;
   const sceneTwoStart = sceneOneStart + vh * sceneOneScreens;
-  const sceneTwoScreens = 1.85;
+  const sceneTwoScreens = 1.75;
   const afterSticky = sceneTwoStart + vh * sceneTwoScreens;
 
   useEffect(() => {
@@ -75,21 +74,17 @@ export default function LandingScreen() {
       [1, 0.55, 0],
       Extrapolation.CLAMP,
     );
-    const translateY = interpolate(scrollY.value, [0, vh * 0.75], [0, -48], Extrapolation.CLAMP);
-    const scale = interpolate(scrollY.value, [0, vh * 0.75], [1, 0.97], Extrapolation.CLAMP);
-    return {
-      opacity,
-      transform: [{ translateY }, { scale }],
-    };
+    const translateY = interpolate(scrollY.value, [0, vh * 0.75], [0, -40], Extrapolation.CLAMP);
+    return { opacity, transform: [{ translateY }] };
   });
 
   const navStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(scrollY.value, [0, 40], [0, 1], Extrapolation.CLAMP);
+    const opacity = interpolate(scrollY.value, [0, 36], [0, 1], Extrapolation.CLAMP);
     return { opacity };
   });
 
   const hintStyle = useAnimatedStyle(() => ({
-    opacity: 0.35 + scrollHint.value * 0.45,
+    opacity: 0.4 + scrollHint.value * 0.45,
     transform: [{ translateY: scrollHint.value * 6 }],
   }));
 
@@ -105,23 +100,21 @@ export default function LandingScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Atmosphere */}
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
         <LinearGradient
-          colors={['#0E1410', colors.mistDeep, '#050505']}
-          locations={[0, 0.45, 1]}
+          colors={['#E4EFE7', colors.mist, '#F7F1E8']}
+          locations={[0, 0.4, 1]}
           style={StyleSheet.absoluteFill}
         />
-        <ParallaxLayer scrollY={scrollY} speed={0.18} style={styles.orbWrap}>
+        <ParallaxLayer scrollY={scrollY} speed={0.15} style={styles.orbWrap}>
           <View style={sx(styles.orb, styles.orbA)} />
           <View style={sx(styles.orb, styles.orbB)} />
         </ParallaxLayer>
       </View>
 
-      {/* Nav */}
-      <View style={sx(styles.nav, { paddingTop: insets.top + space.xs })}>
+      <View style={sx(styles.nav, { paddingTop: insets.top + space.sm })}>
         <Animated.View style={[styles.navBg, navStyle]} />
-        <NestLogo size={30} />
+        <NestLogo size={32} />
         <View style={styles.navActions}>
           <Pressable onPress={() => router.push('/login')} hitSlop={10}>
             <NestText variant="meta" style={styles.navLink}>
@@ -140,7 +133,6 @@ export default function LandingScreen() {
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
         onScroll={onScroll}>
-        {/* —— Hero —— */}
         <View style={sx(styles.hero, { minHeight: heroH, paddingTop: navH + space.md })}>
           <Animated.View style={[sx(styles.heroGrid, wide && styles.heroGridWide), heroStyle]}>
             <View style={sx(styles.heroCopy, wide && styles.heroCopyWide)}>
@@ -159,7 +151,8 @@ export default function LandingScreen() {
               </Enter>
               <Enter delay={320}>
                 <NestText variant="subtitle" style={styles.support}>
-                  Schoolwork and Craft todos, ranked into one calm list for your MacBook and phone.
+                  Schoolwork and Craft todos, ranked into one calm focus list — on your MacBook and
+                  phone.
                 </NestText>
               </Enter>
               <Enter delay={420}>
@@ -192,40 +185,34 @@ export default function LandingScreen() {
           </Animated.View>
         </View>
 
-        {/* —— Sticky: one place —— */}
         <StickyScene scrollY={scrollY} start={sceneOneStart} screens={sceneOneScreens}>
           {(progress) => (
             <View style={styles.stickyInner}>
               <FocusLine progress={progress} from={0} to={0.38}>
-                <NestText variant="label" style={styles.focusLabel}>
-                  One place
-                </NestText>
+                <NestText variant="label">One place</NestText>
               </FocusLine>
               <FocusLine progress={progress} from={0.05} to={0.52}>
                 <NestText
                   variant="title"
                   style={sx(styles.focusTitle, wide && styles.focusTitleWide)}>
-                  Schoology and Craft,{'\n'}finally together.
+                  Schoology and Craft,{'\n'}together at last.
                 </NestText>
               </FocusLine>
               <FocusLine progress={progress} from={0.2} to={0.75}>
                 <NestText variant="subtitle" style={styles.focusBody}>
-                  Stop bouncing between tabs. Nest pulls assignments and todos into a single focus
-                  list — ready on your laptop, the same on your phone.
+                  Stop bouncing between tabs. Nest pulls everything into a single ranked list —
+                  ready wherever you work.
                 </NestText>
               </FocusLine>
             </View>
           )}
         </StickyScene>
 
-        {/* —— Sticky: plain words —— */}
         <StickyScene scrollY={scrollY} start={sceneTwoStart} screens={sceneTwoScreens}>
           {(progress) => (
             <View style={styles.stickyInner}>
               <FocusLine progress={progress} from={0} to={0.28}>
-                <NestText variant="label" style={styles.focusLabel}>
-                  In plain words
-                </NestText>
+                <NestText variant="label">In plain words</NestText>
               </FocusLine>
               <FocusLine progress={progress} from={0.04} to={0.3}>
                 <NestText
@@ -256,18 +243,15 @@ export default function LandingScreen() {
           )}
         </StickyScene>
 
-        {/* —— After sticky —— */}
         <View style={styles.after}>
           <Reveal scrollY={scrollY} start={afterSticky + 40} fadeOut={false}>
-            <NestText variant="label" style={styles.focusLabel}>
-              Connected
-            </NestText>
+            <NestText variant="label">How it works</NestText>
             <NestText variant="title" style={styles.sectionTitle}>
-              Craft is live. Schoology is next.
+              Connect once. Focus every day.
             </NestText>
             <NestText variant="subtitle" style={styles.sectionBody}>
-              Your Craft tasks already sync into Nest. Mark one done here and it updates there —
-              one place to act.
+              Link Craft in under a minute. Nest ranks what matters, speaks it plainly, and updates
+              Craft when you complete a task.
             </NestText>
           </Reveal>
 
@@ -277,13 +261,13 @@ export default function LandingScreen() {
             fadeOut={false}
             style={styles.closing}>
             <Animated.View entering={FadeIn.duration(600)}>
-              <NestLogo size={44} showWordmark={false} />
+              <NestLogo size={48} showWordmark={false} />
             </Animated.View>
             <NestText variant="title" style={styles.closingTitle}>
               Build your Nest.
             </NestText>
             <NestText variant="subtitle" style={styles.sectionBody}>
-              Create an account and open your first focus list in under a minute.
+              Create an account and open your first focus list today.
             </NestText>
             <Button
               label="Create account"
@@ -300,7 +284,7 @@ export default function LandingScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.mistDeep,
+    backgroundColor: colors.mist,
   },
   scroll: {
     flex: 1,
@@ -309,7 +293,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.mistDeep,
+    backgroundColor: colors.mist,
   },
   orbWrap: {
     ...StyleSheet.absoluteFill,
@@ -321,16 +305,16 @@ const styles = StyleSheet.create({
   orbA: {
     width: 420,
     height: 420,
-    top: -80,
-    right: -120,
-    backgroundColor: 'rgba(111, 168, 135, 0.14)',
+    top: -100,
+    right: -140,
+    backgroundColor: 'rgba(47, 106, 79, 0.14)',
   },
   orbB: {
-    width: 320,
-    height: 320,
-    top: 220,
-    left: -140,
-    backgroundColor: 'rgba(91, 164, 208, 0.08)',
+    width: 300,
+    height: 300,
+    top: 260,
+    left: -120,
+    backgroundColor: 'rgba(184, 150, 90, 0.1)',
   },
   nav: {
     position: 'absolute',
@@ -346,7 +330,7 @@ const styles = StyleSheet.create({
   },
   navBg: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(5, 5, 5, 0.88)',
+    backgroundColor: 'rgba(255, 252, 247, 0.92)',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.line,
   },
@@ -360,7 +344,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyMedium,
   },
   navCta: {
-    minHeight: 36,
+    minHeight: 40,
     paddingHorizontal: space.md,
     borderRadius: radius.md,
   },
@@ -390,16 +374,16 @@ const styles = StyleSheet.create({
     maxWidth: 480,
   },
   brand: {
-    fontSize: 64,
-    lineHeight: 66,
-    letterSpacing: -1.6,
+    fontSize: 68,
+    lineHeight: 70,
+    letterSpacing: -2,
     color: colors.ink,
     marginTop: space.xs,
   },
   brandWide: {
-    fontSize: 80,
-    lineHeight: 82,
-    letterSpacing: -2,
+    fontSize: 84,
+    lineHeight: 86,
+    letterSpacing: -2.4,
   },
   headline: {
     fontSize: 28,
@@ -415,8 +399,8 @@ const styles = StyleSheet.create({
     letterSpacing: -0.7,
   },
   support: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 17,
+    lineHeight: 26,
     color: colors.inkMuted,
     maxWidth: 400,
     marginTop: space.xxs,
@@ -424,11 +408,11 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: space.xs,
+    gap: space.sm,
     marginTop: space.md,
   },
   cta: {
-    minWidth: 140,
+    minWidth: 148,
   },
   previewCol: {
     flexShrink: 0,
@@ -452,10 +436,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   scrollLine: {
-    width: 1,
+    width: 1.5,
     height: 28,
     backgroundColor: colors.leaf,
-    opacity: 0.7,
+    opacity: 0.75,
   },
   stickyInner: {
     maxWidth: layout.maxWidth,
@@ -463,23 +447,20 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     gap: space.sm,
   },
-  focusLabel: {
-    color: colors.leaf,
-  },
   focusTitle: {
     fontSize: 36,
-    lineHeight: 40,
-    letterSpacing: -0.7,
+    lineHeight: 42,
+    letterSpacing: -0.8,
     maxWidth: 640,
   },
   focusTitleWide: {
     fontSize: 52,
     lineHeight: 56,
-    letterSpacing: -1.1,
+    letterSpacing: -1.2,
   },
   focusBody: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 17,
+    lineHeight: 26,
     maxWidth: 480,
     color: colors.inkMuted,
   },
@@ -503,15 +484,15 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   sectionTitle: {
-    fontSize: 30,
-    lineHeight: 36,
-    letterSpacing: -0.5,
+    fontSize: 32,
+    lineHeight: 38,
+    letterSpacing: -0.6,
     maxWidth: 560,
     marginTop: space.xs,
   },
   sectionBody: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 17,
+    lineHeight: 26,
     maxWidth: 480,
     marginTop: space.xs,
     color: colors.inkMuted,
@@ -523,11 +504,11 @@ const styles = StyleSheet.create({
   },
   closingTitle: {
     fontSize: 36,
-    lineHeight: 40,
+    lineHeight: 42,
     letterSpacing: -0.7,
   },
   closingCta: {
     marginTop: space.sm,
-    minWidth: 168,
+    minWidth: 180,
   },
 });

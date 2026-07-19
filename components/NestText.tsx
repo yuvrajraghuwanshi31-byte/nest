@@ -39,7 +39,7 @@ const variants: Record<Variant, TextStyle> = {
     fontSize: type.label.size,
     lineHeight: type.label.line,
     letterSpacing: type.label.tracking,
-    color: colors.inkSoft,
+    color: colors.leaf,
     textTransform: 'uppercase',
   },
   meta: {

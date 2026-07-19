@@ -7,7 +7,7 @@ import { NestText } from '@/components/NestText';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
-import { colors, fonts, radius, space } from '@/constants/theme';
+import { colors, fonts, radius, shadow, space } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
 import { useTasks } from '@/lib/TasksContext';
 import { useWideLayout } from '@/hooks/useWideLayout';
@@ -52,21 +52,20 @@ export default function ConnectionsScreen() {
     <Screen>
       <View style={styles.header}>
         <NestText variant="label">Connections</NestText>
-        <NestText variant="title">Control school + todos from Nest</NestText>
+        <NestText variant="title">Bring your tools into Nest</NestText>
         <NestText variant="subtitle">
-          Paste your Craft API URL here to pull real todos. Schoology connects next.
+          Link Craft to pull todos into your focus list. Schoology is coming soon.
         </NestText>
       </View>
 
       <View style={styles.setupCard}>
-        <NestText variant="label">Craft API URL</NestText>
+        <NestText variant="label">Craft</NestText>
         <NestText variant="body" style={styles.setupLine}>
-          In Craft: Imagine (sidebar) → Add API Connection → copy the API URL at the top. It looks
-          like https://connect.craft.do/links/…/api/v1
+          In Craft, open Imagine → Add API Connection → copy the API URL. Paste it below and save.
         </NestText>
 
         <TextField
-          label="Your Craft API URL"
+          label="API URL"
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="off"
@@ -79,14 +78,14 @@ export default function ConnectionsScreen() {
         />
 
         <Button
-          label={saving || loading ? 'Saving & syncing…' : 'Save & sync Craft'}
+          label={saving || loading ? 'Saving…' : 'Save & sync'}
           onPress={onSaveAndSync}
           disabled={saving || loading}
         />
 
         {saveOk && !saveError ? (
           <NestText variant="meta" style={styles.ok}>
-            Craft URL saved.
+            Connected and syncing.
           </NestText>
         ) : null}
         {saveError ? (
@@ -133,7 +132,7 @@ export default function ConnectionsScreen() {
       ) : null}
 
       <Button
-        label={loading ? 'Syncing…' : 'Sync Craft now'}
+        label={loading ? 'Syncing…' : 'Sync now'}
         variant="secondary"
         onPress={() => refresh()}
         disabled={loading || saving}
@@ -155,18 +154,18 @@ export default function ConnectionsScreen() {
 
 function statusLabel(status: 'connected' | 'disconnected' | 'demo') {
   if (status === 'connected') return 'Connected';
-  if (status === 'demo') return 'Demo';
-  return 'Offline';
+  if (status === 'demo') return 'Soon';
+  return 'Not connected';
 }
 
 function badgeBg(status: 'connected' | 'disconnected' | 'demo', id: string) {
-  if (status === 'connected') return '#1A2A22';
-  if (id === 'schoology') return '#152430';
-  return '#2A1818';
+  if (status === 'connected') return colors.leafSoft;
+  if (id === 'schoology') return '#E8F1F7';
+  return colors.urgentSoft;
 }
 
 function badgeColor(status: 'connected' | 'disconnected' | 'demo', id: string) {
-  if (status === 'connected') return colors.leaf;
+  if (status === 'connected') return colors.leafDeep;
   if (id === 'schoology') return colors.schoology;
   return colors.urgent;
 }
@@ -177,26 +176,28 @@ const styles = StyleSheet.create({
   },
   setupCard: {
     backgroundColor: colors.surfaceRaised,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.lineStrong,
-    borderRadius: radius.lg,
-    padding: space.md,
-    gap: space.sm,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: radius.xl,
+    padding: space.lg,
+    gap: space.md,
+    ...shadow.soft,
   },
   setupLine: {
-    color: colors.inkSoft,
-    lineHeight: 22,
+    color: colors.inkMuted,
+    lineHeight: 24,
   },
   list: {
-    gap: space.xs,
+    gap: space.sm,
   },
   card: {
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
+    backgroundColor: colors.surfaceRaised,
+    borderWidth: 1,
     borderColor: colors.line,
-    borderRadius: radius.lg,
-    padding: space.md,
+    borderRadius: radius.xl,
+    padding: space.lg,
     gap: space.xs,
+    ...shadow.soft,
   },
   cardTop: {
     flexDirection: 'row',
@@ -206,17 +207,18 @@ const styles = StyleSheet.create({
   },
   name: {
     fontFamily: fonts.bodyBold,
-    fontSize: 16,
+    fontSize: 17,
   },
   badge: {
-    paddingHorizontal: space.xs,
-    paddingVertical: 3,
-    borderRadius: radius.sm,
+    paddingHorizontal: space.sm,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
   },
   error: {
     color: colors.urgent,
   },
   ok: {
-    color: colors.leaf,
+    color: colors.leafDeep,
+    fontFamily: fonts.bodyBold,
   },
 });

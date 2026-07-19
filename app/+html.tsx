@@ -8,6 +8,7 @@ export default function Root({ children }: { children: ReactNode }) {
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="theme-color" content="#F4F1EB" />
         <ScrollViewStyleReset />
         <style dangerouslySetInnerHTML={{ __html: baseCss }} />
       </head>
@@ -21,8 +22,10 @@ html, body, #root {
   height: 100%;
 }
 body {
-  background-color: #0A0A0A;
+  background-color: #F4F1EB;
   margin: 0;
-  color: #F2F2F0;
+  color: #1C1B19;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 `;

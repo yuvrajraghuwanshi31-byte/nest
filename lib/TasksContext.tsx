@@ -99,14 +99,14 @@ export function TasksProvider({ children }: { children: ReactNode }) {
         {
           id: 'schoology',
           name: 'Schoology',
-          description: 'Pull assignments, due dates, and course work from your classes.',
+          description: 'Assignments, due dates, and course work from your classes.',
           status: 'disconnected',
-          lastSyncLabel: 'Not connected yet',
+          lastSyncLabel: 'Coming soon',
         },
         {
           id: 'craft',
           name: 'Craft',
-          description: 'Read and update your todos so Nest stays the single place to act.',
+          description: 'Todos sync both ways so Nest stays your single place to act.',
           status: 'connected',
           lastSyncLabel: connection?.space?.name
             ? `Synced · ${connection.space.name}`
@@ -120,16 +120,16 @@ export function TasksProvider({ children }: { children: ReactNode }) {
         {
           id: 'schoology',
           name: 'Schoology',
-          description: 'Pull assignments, due dates, and course work from your classes.',
+          description: 'Assignments, due dates, and course work from your classes.',
           status: 'disconnected',
-          lastSyncLabel: 'Not connected yet',
+          lastSyncLabel: 'Coming soon',
         },
         {
           id: 'craft',
           name: 'Craft',
-          description: 'Read and update your todos so Nest stays the single place to act.',
+          description: 'Todos sync both ways so Nest stays your single place to act.',
           status: 'disconnected',
-          lastSyncLabel: 'Sync failed',
+          lastSyncLabel: 'Couldn’t sync — check your API URL',
         },
       ]);
     } finally {

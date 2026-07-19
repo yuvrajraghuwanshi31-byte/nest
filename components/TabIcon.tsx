@@ -18,7 +18,7 @@ export function TabIcon({
   color: ColorValue;
 }) {
   return (
-    <View style={sx(styles.wrap, { borderColor: color })}>
+    <View style={sx(styles.wrap, { borderColor: color, backgroundColor: colors.surfaceRaised })}>
       <NestText variant="meta" style={sx(styles.label, { color })}>
         {LABELS[name]}
       </NestText>
@@ -28,17 +28,16 @@ export function TabIcon({
 
 const styles = StyleSheet.create({
   wrap: {
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
     borderRadius: radius.sm,
-    borderWidth: 1.25,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.surface,
   },
   label: {
     fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    lineHeight: 12,
+    fontSize: 11,
+    lineHeight: 13,
   },
 });

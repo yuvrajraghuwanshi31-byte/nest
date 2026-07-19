@@ -4,15 +4,15 @@ export const DEMO_CONNECTIONS: Connection[] = [
   {
     id: 'schoology',
     name: 'Schoology',
-    description: 'Pull assignments, due dates, and course work from your classes.',
+    description: 'Assignments, due dates, and course work from your classes.',
     status: 'disconnected',
-    lastSyncLabel: 'Not connected yet',
+    lastSyncLabel: 'Coming soon',
   },
   {
     id: 'craft',
     name: 'Craft',
-    description: 'Read and update your todos so Nest stays the single place to act.',
+    description: 'Todos sync both ways so Nest stays your single place to act.',
     status: 'disconnected',
-    lastSyncLabel: 'Sign in to sync',
+    lastSyncLabel: 'Add your API URL above',
   },
 ];

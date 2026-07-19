@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -6,26 +7,27 @@ import { NestText } from '@/components/NestText';
 import { Screen } from '@/components/Screen';
 import { TaskRow } from '@/components/TaskRow';
 import { Button } from '@/components/ui/Button';
-import { colors, fonts, radius, space } from '@/constants/theme';
+import { colors, fonts, radius, shadow, space } from '@/constants/theme';
 import { useWideLayout } from '@/hooks/useWideLayout';
 import { useTasks } from '@/lib/TasksContext';
 
 export default function DoThisNextScreen() {
-  const { ranked, briefing, completeTask, loading, syncError, refresh } = useTasks();
+  const { ranked, briefing, completeTask, loading, syncError, refresh, craftApiUrl } = useTasks();
   const wide = useWideLayout();
   const focus = ranked.slice(0, 8);
   const topThree = focus.slice(0, 3);
+  const needsCraft = !loading && !syncError && ranked.length === 0 && !craftApiUrl;
 
   return (
     <Screen>
-      <Animated.View entering={FadeIn.duration(350)} style={styles.header}>
-        {!wide ? <NestLogo size={28} style={styles.mobileBrand} /> : null}
-        <NestText variant="label">Do this next</NestText>
+      <Animated.View entering={FadeIn.duration(400)} style={styles.header}>
+        {!wide ? <NestLogo size={30} style={styles.mobileBrand} /> : null}
+        <NestText variant="label">Focus</NestText>
         <NestText variant="title" style={styles.headline}>
           {greeting()}, here’s your focus.
         </NestText>
         <NestText variant="subtitle">
-          {loading ? 'Pulling your Craft tasks…' : briefing}
+          {loading ? 'Syncing your tasks…' : briefing}
         </NestText>
       </Animated.View>
 
@@ -34,14 +36,14 @@ export default function DoThisNextScreen() {
           <NestText variant="meta" style={styles.errorText}>
             {syncError}
           </NestText>
-          <Button label="Try sync again" onPress={() => refresh()} />
+          <Button label="Try again" onPress={() => refresh()} />
         </View>
       ) : null}
 
       {loading && ranked.length === 0 ? (
         <View style={styles.loadingBlock}>
           <ActivityIndicator color={colors.leaf} />
-          <NestText variant="subtitle">Loading your Craft list…</NestText>
+          <NestText variant="subtitle">Loading your list…</NestText>
         </View>
       ) : null}
 
@@ -54,28 +56,39 @@ export default function DoThisNextScreen() {
         </View>
       ) : null}
 
-      {!loading && !syncError && ranked.length === 0 ? (
+      {!loading && !syncError && ranked.length === 0 && craftApiUrl ? (
         <View style={styles.speakBlock}>
           <NestText variant="body" style={styles.speakLine}>
-            Nothing open in Craft — you’re clear.
+            You’re clear — nothing open right now.
           </NestText>
         </View>
       ) : null}
 
-      <View>
-        <NestText variant="label" style={styles.listLabel}>
-          From your Craft
-        </NestText>
-        {focus.map((task, index) => (
-          <TaskRow
-            key={task.id}
-            task={task}
-            index={index}
-            onComplete={completeTask}
-            showReason
-          />
-        ))}
-      </View>
+      {needsCraft ? (
+        <View style={styles.speakBlock}>
+          <NestText variant="body" style={styles.speakLine}>
+            Connect Craft to see what to do next.
+          </NestText>
+          <Button label="Connect Craft" onPress={() => router.push('/connections')} />
+        </View>
+      ) : null}
+
+      {focus.length > 0 ? (
+        <View>
+          <NestText variant="label" style={styles.listLabel}>
+            Up next
+          </NestText>
+          {focus.map((task, index) => (
+            <TaskRow
+              key={task.id}
+              task={task}
+              index={index}
+              onComplete={completeTask}
+              showReason
+            />
+          ))}
+        </View>
+      ) : null}
     </Screen>
   );
 }
@@ -98,29 +111,30 @@ const styles = StyleSheet.create({
     gap: space.xs,
   },
   mobileBrand: {
-    marginBottom: space.xxs,
+    marginBottom: space.xs,
   },
   headline: {
     maxWidth: 560,
   },
   speakBlock: {
     backgroundColor: colors.surfaceRaised,
-    borderRadius: radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.lineStrong,
-    paddingVertical: space.md,
-    paddingHorizontal: space.md,
-    gap: space.xs,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.line,
+    paddingVertical: space.lg,
+    paddingHorizontal: space.lg,
+    gap: space.md,
+    ...shadow.soft,
   },
   speakLine: {
     color: colors.ink,
     fontFamily: fonts.display,
-    fontSize: 20,
-    lineHeight: 26,
-    letterSpacing: -0.3,
+    fontSize: 22,
+    lineHeight: 28,
+    letterSpacing: -0.4,
   },
   listLabel: {
-    marginBottom: space.xs,
+    marginBottom: space.sm,
   },
   loadingBlock: {
     gap: space.sm,
@@ -129,11 +143,11 @@ const styles = StyleSheet.create({
   },
   errorBlock: {
     gap: space.sm,
-    padding: space.sm,
-    borderRadius: radius.md,
+    padding: space.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.urgent,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.urgentSoft,
   },
   errorText: {
     color: colors.urgent,

@@ -15,6 +15,9 @@ import Animated, {
 import { colors, space } from '@/constants/theme';
 import { sx } from '@/lib/sx';
 
+// sticky scenes sit on the page canvas color
+const sceneBg = 'transparent';
+
 const easeOut = Easing.bezier(0.22, 1, 0.36, 1);
 
 /** Soft enter on mount — staggered with `delay`. */
@@ -119,7 +122,7 @@ export function StickyScene({ scrollY, start, screens = 1.55, children }: Sticky
   );
 
   return (
-    <View style={{ height: runway, backgroundColor: 'transparent' }}>
+    <View style={{ height: runway, backgroundColor: sceneBg }}>
       <View style={sx(styles.sticky, { height: vh })}>{children(progress)}</View>
     </View>
   );

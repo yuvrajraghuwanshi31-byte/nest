@@ -8,9 +8,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { sx } from '@/lib/sx';
 
 const LINKS = [
-  { href: '/home', label: 'Do this next', hint: 'Ranked focus' },
-  { href: '/tasks', label: 'All tasks', hint: 'Everything' },
-  { href: '/connections', label: 'Connections', hint: 'Schoology & Craft' },
+  { href: '/home', label: 'Focus', hint: 'What to do next' },
+  { href: '/tasks', label: 'Tasks', hint: 'Full list' },
+  { href: '/connections', label: 'Connections', hint: 'Craft & Schoology' },
 ] as const;
 
 export function Sidebar() {
@@ -20,9 +20,9 @@ export function Sidebar() {
   return (
     <View style={styles.sidebar}>
       <View style={styles.brandBlock}>
-        <NestLogo size={28} />
+        <NestLogo size={32} />
         <NestText variant="meta" style={styles.tagline}>
-          {user?.name ? `Hi, ${user.name.split(' ')[0]}` : 'School + todos'}
+          {user?.name ? `Hi, ${user.name.split(' ')[0]}` : 'Your focus nest'}
         </NestText>
       </View>
 
@@ -38,7 +38,7 @@ export function Sidebar() {
               <NestText variant="body" style={sx(styles.linkLabel, active && styles.linkLabelActive)}>
                 {link.label}
               </NestText>
-              <NestText variant="meta" style={active ? styles.hintActive : undefined}>
+              <NestText variant="meta" style={active ? styles.hintActive : styles.hint}>
                 {link.hint}
               </NestText>
             </Pressable>
@@ -47,7 +47,7 @@ export function Sidebar() {
       </View>
 
       <View style={styles.footer}>
-        <NestText variant="meta" numberOfLines={1}>
+        <NestText variant="meta" numberOfLines={1} style={styles.email}>
           {user?.email}
         </NestText>
         <Pressable
@@ -70,16 +70,16 @@ const styles = StyleSheet.create({
     width: layout.sidebarWidth,
     borderRightWidth: StyleSheet.hairlineWidth,
     borderRightColor: colors.line,
-    backgroundColor: colors.mistDeep,
-    paddingTop: space.xl,
-    paddingHorizontal: space.sm,
-    paddingBottom: space.lg,
+    backgroundColor: colors.surfaceRaised,
+    paddingTop: space.xxl,
+    paddingHorizontal: space.md,
+    paddingBottom: space.xl,
     justifyContent: 'space-between',
   },
   brandBlock: {
-    gap: space.xs,
+    gap: space.sm,
     paddingHorizontal: space.xs,
-    marginBottom: space.md,
+    marginBottom: space.xl,
   },
   tagline: {
     color: colors.inkMuted,
@@ -92,31 +92,35 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     paddingVertical: space.sm,
     paddingHorizontal: space.sm,
-    gap: 1,
+    gap: 2,
   },
   linkActive: {
-    backgroundColor: colors.surfaceRaised,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.lineStrong,
+    backgroundColor: colors.leafSoft,
   },
   linkLabel: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 14,
+    fontSize: 15,
     color: colors.inkMuted,
   },
   linkLabelActive: {
-    color: colors.ink,
+    color: colors.leafDeep,
     fontFamily: fonts.bodyBold,
   },
-  hintActive: {
+  hint: {
     color: colors.inkSoft,
+  },
+  hintActive: {
+    color: colors.leaf,
   },
   footer: {
     paddingHorizontal: space.xs,
-    paddingTop: space.sm,
-    gap: space.xs,
+    paddingTop: space.md,
+    gap: space.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.line,
+  },
+  email: {
+    color: colors.inkSoft,
   },
   signOut: {
     color: colors.leaf,

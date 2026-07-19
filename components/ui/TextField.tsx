@@ -23,17 +23,17 @@ export function TextField({ label, style, ...props }: Props) {
 
 const styles = StyleSheet.create({
   wrap: {
-    gap: space.xxs,
+    gap: space.xs,
   },
   input: {
-    minHeight: 44,
+    minHeight: 48,
     borderWidth: 1,
     borderColor: colors.line,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceRaised,
     borderRadius: radius.md,
-    paddingHorizontal: space.sm,
+    paddingHorizontal: space.md,
     fontFamily: fonts.body,
-    fontSize: 15,
+    fontSize: 16,
     color: colors.ink,
   },
 });
