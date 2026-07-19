@@ -11,7 +11,6 @@ import {
 import Animated, {
   Easing,
   Extrapolation,
-  FadeIn,
   interpolate,
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -21,14 +20,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ProductPreview } from '@/components/landing/ProductPreview';
-import {
-  Enter,
-  FocusLine,
-  ParallaxLayer,
-  Reveal,
-  StickyScene,
-} from '@/components/landing/ScrollFocus';
+import { ChaosLayer } from '@/components/landing/ChaosLayer';
+import { FocusStory } from '@/components/landing/FocusStory';
+import { Enter, ParallaxLayer, Reveal, StickyScene } from '@/components/landing/ScrollFocus';
 import { NestLogo } from '@/components/NestLogo';
 import { NestText } from '@/components/NestText';
 import { Button } from '@/components/ui/Button';
@@ -45,13 +39,12 @@ export default function LandingScreen() {
   const wide = width >= layout.breakpoint;
 
   const navH = insets.top + 64;
-  const heroH = Math.max(vh - navH * 0.15, wide ? 700 : 620);
+  const heroH = Math.max(vh - 40, wide ? 680 : 580);
 
-  const sceneOneStart = heroH + navH * 0.4;
-  const sceneOneScreens = 1.45;
-  const sceneTwoStart = sceneOneStart + vh * sceneOneScreens;
-  const sceneTwoScreens = 1.75;
-  const afterSticky = sceneTwoStart + vh * sceneTwoScreens;
+  // Story runway: chaos → focus morph (one long sticky)
+  const storyStart = heroH;
+  const storyScreens = 2.4;
+  const actStart = storyStart + vh * storyScreens;
 
   useEffect(() => {
     scrollHint.value = withRepeat(
@@ -70,21 +63,20 @@ export default function LandingScreen() {
   const heroStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
-      [0, vh * 0.4, vh * 0.75],
-      [1, 0.55, 0],
+      [0, vh * 0.35, vh * 0.7],
+      [1, 0.5, 0],
       Extrapolation.CLAMP,
     );
-    const translateY = interpolate(scrollY.value, [0, vh * 0.75], [0, -40], Extrapolation.CLAMP);
+    const translateY = interpolate(scrollY.value, [0, vh * 0.7], [0, -36], Extrapolation.CLAMP);
     return { opacity, transform: [{ translateY }] };
   });
 
-  const navStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(scrollY.value, [0, 36], [0, 1], Extrapolation.CLAMP);
-    return { opacity };
-  });
+  const navStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, 32], [0, 1], Extrapolation.CLAMP),
+  }));
 
   const hintStyle = useAnimatedStyle(() => ({
-    opacity: 0.4 + scrollHint.value * 0.45,
+    opacity: 0.35 + scrollHint.value * 0.5,
     transform: [{ translateY: scrollHint.value * 6 }],
   }));
 
@@ -103,10 +95,10 @@ export default function LandingScreen() {
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
         <LinearGradient
           colors={['#E4EFE7', colors.mist, '#F7F1E8']}
-          locations={[0, 0.4, 1]}
+          locations={[0, 0.45, 1]}
           style={StyleSheet.absoluteFill}
         />
-        <ParallaxLayer scrollY={scrollY} speed={0.15} style={styles.orbWrap}>
+        <ParallaxLayer scrollY={scrollY} speed={0.12} style={styles.orbWrap}>
           <View style={sx(styles.orb, styles.orbA)} />
           <View style={sx(styles.orb, styles.orbB)} />
         </ParallaxLayer>
@@ -133,141 +125,88 @@ export default function LandingScreen() {
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}
         onScroll={onScroll}>
-        <View style={sx(styles.hero, { minHeight: heroH, paddingTop: navH + space.md })}>
-          <Animated.View style={[sx(styles.heroGrid, wide && styles.heroGridWide), heroStyle]}>
-            <View style={sx(styles.heroCopy, wide && styles.heroCopyWide)}>
-              <Enter delay={40}>
-                <NestLogo size={wide ? 56 : 48} showWordmark={false} />
-              </Enter>
-              <Enter delay={120}>
-                <NestText variant="brand" style={sx(styles.brand, wide && styles.brandWide)}>
-                  Nest
-                </NestText>
-              </Enter>
-              <Enter delay={220}>
-                <NestText variant="title" style={sx(styles.headline, wide && styles.headlineWide)}>
-                  Know what to do next.
-                </NestText>
-              </Enter>
-              <Enter delay={320}>
-                <NestText variant="subtitle" style={styles.support}>
-                  Schoolwork and Craft todos, ranked into one calm focus list — on your MacBook and
-                  phone.
-                </NestText>
-              </Enter>
-              <Enter delay={420}>
-                <View style={styles.actions}>
-                  <Button
-                    label="Create account"
-                    onPress={() => router.push('/signup')}
-                    style={styles.cta}
-                  />
-                  <Button
-                    label="Sign in"
-                    variant="secondary"
-                    onPress={() => router.push('/login')}
-                    style={styles.cta}
-                  />
-                </View>
-              </Enter>
-            </View>
-
-            <Enter delay={380} style={wide ? styles.previewCol : styles.previewColMobile}>
-              <ProductPreview wide={wide} />
+        {/* Hero — brand only, no product card */}
+        <View style={sx(styles.hero, { minHeight: heroH, paddingTop: navH })}>
+          <Animated.View style={[styles.heroInner, heroStyle]}>
+            <Enter delay={60}>
+              <NestText variant="brand" style={sx(styles.brand, wide && styles.brandWide)}>
+                Nest
+              </NestText>
+            </Enter>
+            <Enter delay={180}>
+              <NestText variant="title" style={sx(styles.headline, wide && styles.headlineWide)}>
+                Know what to do next.
+              </NestText>
+            </Enter>
+            <Enter delay={280}>
+              <NestText variant="subtitle" style={styles.support}>
+                School and Craft, ranked into one calm focus list.
+              </NestText>
+            </Enter>
+            <Enter delay={380}>
+              <View style={styles.actions}>
+                <Button
+                  label="Create account"
+                  onPress={() => router.push('/signup')}
+                  style={styles.cta}
+                />
+                <Button
+                  label="Sign in"
+                  variant="secondary"
+                  onPress={() => router.push('/login')}
+                  style={styles.cta}
+                />
+              </View>
             </Enter>
           </Animated.View>
 
           <Animated.View style={[styles.scrollHint, hintStyle]}>
             <NestText variant="meta" style={styles.scrollHintText}>
-              Scroll
+              See how
             </NestText>
             <View style={styles.scrollLine} />
           </Animated.View>
         </View>
 
-        <StickyScene scrollY={scrollY} start={sceneOneStart} screens={sceneOneScreens}>
+        {/* Story — chaos collapses into Focus UI */}
+        <StickyScene scrollY={scrollY} start={storyStart} screens={storyScreens}>
           {(progress) => (
-            <View style={styles.stickyInner}>
-              <FocusLine progress={progress} from={0} to={0.38}>
-                <NestText variant="label">One place</NestText>
-              </FocusLine>
-              <FocusLine progress={progress} from={0.05} to={0.52}>
-                <NestText
-                  variant="title"
-                  style={sx(styles.focusTitle, wide && styles.focusTitleWide)}>
-                  Schoology and Craft,{'\n'}together at last.
+            <View style={styles.storyStage}>
+              <ChaosLayer progress={progress} />
+              <View style={styles.storyCopy} pointerEvents="none">
+                <NestText variant="label">The problem</NestText>
+                <NestText variant="title" style={sx(styles.storyTitle, wide && styles.storyTitleWide)}>
+                  Too many places.{'\n'}No clear next step.
                 </NestText>
-              </FocusLine>
-              <FocusLine progress={progress} from={0.2} to={0.75}>
-                <NestText variant="subtitle" style={styles.focusBody}>
-                  Stop bouncing between tabs. Nest pulls everything into a single ranked list —
-                  ready wherever you work.
-                </NestText>
-              </FocusLine>
-            </View>
-          )}
-        </StickyScene>
-
-        <StickyScene scrollY={scrollY} start={sceneTwoStart} screens={sceneTwoScreens}>
-          {(progress) => (
-            <View style={styles.stickyInner}>
-              <FocusLine progress={progress} from={0} to={0.28}>
-                <NestText variant="label">In plain words</NestText>
-              </FocusLine>
-              <FocusLine progress={progress} from={0.04} to={0.3}>
-                <NestText
-                  variant="title"
-                  style={sx(styles.focusTitle, wide && styles.focusTitleWide)}>
-                  It tells you what to do.
-                </NestText>
-              </FocusLine>
-
-              <View style={styles.stack}>
-                <FocusLine progress={progress} from={0.18} to={0.48}>
-                  <NestText variant="body" style={styles.stackLine}>
-                    Finish the lab report.
-                  </NestText>
-                </FocusLine>
-                <FocusLine progress={progress} from={0.36} to={0.66}>
-                  <NestText variant="body" style={styles.stackLine}>
-                    Outline the DBQ.
-                  </NestText>
-                </FocusLine>
-                <FocusLine progress={progress} from={0.54} to={0.88}>
-                  <NestText variant="body" style={styles.stackLine}>
-                    Clear your Craft inbox.
-                  </NestText>
-                </FocusLine>
               </View>
+              <FocusStory progress={progress} />
             </View>
           )}
         </StickyScene>
 
-        <View style={styles.after}>
-          <Reveal scrollY={scrollY} start={afterSticky + 40} fadeOut={false}>
-            <NestText variant="label">How it works</NestText>
-            <NestText variant="title" style={styles.sectionTitle}>
-              Connect once. Focus every day.
+        {/* Act — complete updates Craft */}
+        <View style={styles.act}>
+          <Reveal scrollY={scrollY} start={actStart + 20} fadeOut={false}>
+            <NestText variant="label">Then act</NestText>
+            <NestText variant="title" style={styles.actTitle}>
+              Mark it done in Nest.{'\n'}It updates in Craft.
             </NestText>
-            <NestText variant="subtitle" style={styles.sectionBody}>
-              Link Craft in under a minute. Nest ranks what matters, speaks it plainly, and updates
-              Craft when you complete a task.
+            <NestText variant="subtitle" style={styles.actBody}>
+              One list to decide. One tap to finish. Your tools stay in sync.
             </NestText>
           </Reveal>
 
           <Reveal
             scrollY={scrollY}
-            start={afterSticky + vh * 0.28}
+            start={actStart + vh * 0.35}
             fadeOut={false}
             style={styles.closing}>
-            <Animated.View entering={FadeIn.duration(600)}>
-              <NestLogo size={48} showWordmark={false} />
-            </Animated.View>
+            <NestLogo size={48} showWordmark={false} />
             <NestText variant="title" style={styles.closingTitle}>
               Build your Nest.
             </NestText>
-            <NestText variant="subtitle" style={styles.sectionBody}>
-              Create an account and open your first focus list today.
+            <NestText variant="subtitle" style={styles.actBody}>
+              Create an account and open your first focus list.
             </NestText>
             <Button
               label="Create account"
@@ -303,17 +242,17 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   orbA: {
-    width: 420,
-    height: 420,
-    top: -100,
-    right: -140,
-    backgroundColor: 'rgba(47, 106, 79, 0.14)',
+    width: 400,
+    height: 400,
+    top: -80,
+    right: -120,
+    backgroundColor: 'rgba(47, 106, 79, 0.12)',
   },
   orbB: {
-    width: 300,
-    height: 300,
-    top: 260,
-    left: -120,
+    width: 280,
+    height: 280,
+    top: 200,
+    left: -100,
     backgroundColor: 'rgba(184, 150, 90, 0.1)',
   },
   nav: {
@@ -346,64 +285,45 @@ const styles = StyleSheet.create({
   navCta: {
     minHeight: 40,
     paddingHorizontal: space.md,
-    borderRadius: radius.md,
   },
   hero: {
     paddingHorizontal: space.lg,
     justifyContent: 'center',
     position: 'relative',
   },
-  heroGrid: {
-    width: '100%',
+  heroInner: {
     maxWidth: layout.maxWidth,
+    width: '100%',
     alignSelf: 'center',
-    gap: space.xxl,
-  },
-  heroGridWide: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: space.section,
-  },
-  heroCopy: {
     gap: space.sm,
-    maxWidth: 520,
-  },
-  heroCopyWide: {
-    flex: 1,
-    maxWidth: 480,
+    paddingBottom: space.xxl,
   },
   brand: {
-    fontSize: 68,
-    lineHeight: 70,
-    letterSpacing: -2,
+    fontSize: 96,
+    lineHeight: 96,
+    letterSpacing: -3.5,
     color: colors.ink,
-    marginTop: space.xs,
   },
   brandWide: {
-    fontSize: 84,
-    lineHeight: 86,
-    letterSpacing: -2.4,
+    fontSize: 128,
+    lineHeight: 120,
+    letterSpacing: -5,
   },
   headline: {
     fontSize: 28,
     lineHeight: 34,
     letterSpacing: -0.5,
-    color: colors.ink,
-    maxWidth: 420,
-    marginTop: space.xs,
+    maxWidth: 400,
   },
   headlineWide: {
-    fontSize: 34,
-    lineHeight: 40,
-    letterSpacing: -0.7,
+    fontSize: 36,
+    lineHeight: 42,
   },
   support: {
-    fontSize: 17,
+    fontSize: 18,
     lineHeight: 26,
+    maxWidth: 380,
     color: colors.inkMuted,
-    maxWidth: 400,
-    marginTop: space.xxs,
   },
   actions: {
     flexDirection: 'row',
@@ -414,13 +334,6 @@ const styles = StyleSheet.create({
   cta: {
     minWidth: 148,
   },
-  previewCol: {
-    flexShrink: 0,
-  },
-  previewColMobile: {
-    marginTop: space.md,
-    alignSelf: 'stretch',
-  },
   scrollHint: {
     position: 'absolute',
     bottom: space.xl,
@@ -430,52 +343,42 @@ const styles = StyleSheet.create({
     gap: space.xs,
   },
   scrollHintText: {
-    color: colors.inkSoft,
     letterSpacing: 2,
     textTransform: 'uppercase',
     fontSize: 11,
+    color: colors.inkSoft,
   },
   scrollLine: {
     width: 1.5,
     height: 28,
     backgroundColor: colors.leaf,
-    opacity: 0.75,
   },
-  stickyInner: {
+  storyStage: {
+    flex: 1,
+    justifyContent: 'center',
     maxWidth: layout.maxWidth,
     width: '100%',
     alignSelf: 'center',
-    gap: space.sm,
+    minHeight: '80%',
   },
-  focusTitle: {
-    fontSize: 36,
-    lineHeight: 42,
-    letterSpacing: -0.8,
-    maxWidth: 640,
+  storyCopy: {
+    position: 'absolute',
+    top: '12%',
+    left: 0,
+    right: 0,
+    zIndex: 2,
+    gap: space.xs,
   },
-  focusTitleWide: {
-    fontSize: 52,
-    lineHeight: 56,
-    letterSpacing: -1.2,
+  storyTitle: {
+    fontSize: 32,
+    lineHeight: 38,
+    letterSpacing: -0.6,
   },
-  focusBody: {
-    fontSize: 17,
-    lineHeight: 26,
-    maxWidth: 480,
-    color: colors.inkMuted,
+  storyTitleWide: {
+    fontSize: 44,
+    lineHeight: 50,
   },
-  stack: {
-    marginTop: space.lg,
-    gap: space.md,
-  },
-  stackLine: {
-    fontFamily: fonts.display,
-    fontSize: 30,
-    lineHeight: 36,
-    letterSpacing: -0.5,
-    color: colors.ink,
-  },
-  after: {
+  act: {
     paddingHorizontal: space.lg,
     paddingTop: space.xxl,
     gap: space.section,
@@ -483,24 +386,22 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
-  sectionTitle: {
-    fontSize: 32,
-    lineHeight: 38,
-    letterSpacing: -0.6,
-    maxWidth: 560,
+  actTitle: {
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: -0.7,
     marginTop: space.xs,
   },
-  sectionBody: {
+  actBody: {
     fontSize: 17,
     lineHeight: 26,
-    maxWidth: 480,
+    maxWidth: 440,
     marginTop: space.xs,
     color: colors.inkMuted,
   },
   closing: {
     gap: space.sm,
     paddingBottom: space.xxl,
-    paddingTop: space.lg,
   },
   closingTitle: {
     fontSize: 36,

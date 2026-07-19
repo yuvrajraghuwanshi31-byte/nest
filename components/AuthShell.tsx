@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -6,9 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NestLogo } from '@/components/NestLogo';
 import { NestText } from '@/components/NestText';
-import { colors, radius, shadow, space } from '@/constants/theme';
+import { colors, space } from '@/constants/theme';
 import { sx } from '@/lib/sx';
 
+/** Quiet entry ritual — mark, title, form. No marketing chrome. */
 export function AuthShell({
   title,
   subtitle,
@@ -24,11 +24,6 @@ export function AuthShell({
 
   return (
     <View style={styles.flex}>
-      <LinearGradient
-        colors={['#E8F0EA', colors.mist, '#F7F2EA']}
-        locations={[0, 0.45, 1]}
-        style={StyleSheet.absoluteFill}
-      />
       <ScrollView
         contentContainerStyle={sx(styles.content, {
           paddingTop: insets.top + space.xxl,
@@ -36,8 +31,11 @@ export function AuthShell({
         })}
         keyboardShouldPersistTaps="handled">
         <View style={styles.panel}>
-          <Pressable onPress={() => router.push('/')} hitSlop={8}>
-            <NestLogo size={34} />
+          <Pressable onPress={() => router.push('/')} hitSlop={8} style={styles.brand}>
+            <NestLogo size={36} showWordmark={false} />
+            <NestText variant="brand" style={styles.word}>
+              Nest
+            </NestText>
           </Pressable>
           <View style={styles.heading}>
             <NestText variant="title">{title}</NestText>
@@ -61,14 +59,18 @@ const styles = StyleSheet.create({
   },
   panel: {
     width: '100%',
-    maxWidth: 420,
-    gap: space.lg,
-    backgroundColor: colors.surfaceRaised,
-    borderRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colors.line,
-    padding: space.xl,
-    ...shadow.lift,
+    maxWidth: 400,
+    gap: space.xl,
+  },
+  brand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+  },
+  word: {
+    fontSize: 28,
+    lineHeight: 32,
+    letterSpacing: -0.8,
   },
   heading: {
     gap: space.xs,
@@ -77,7 +79,6 @@ const styles = StyleSheet.create({
     gap: space.md,
   },
   footer: {
-    marginTop: space.xxs,
     alignItems: 'center',
   },
 });

@@ -8,9 +8,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { sx } from '@/lib/sx';
 
 const LINKS = [
-  { href: '/home', label: 'Focus', hint: 'What to do next' },
-  { href: '/tasks', label: 'Tasks', hint: 'Full list' },
-  { href: '/connections', label: 'Connections', hint: 'Craft & Schoology' },
+  { href: '/home', label: 'Focus', mark: '01' },
+  { href: '/tasks', label: 'Board', mark: '02' },
+  { href: '/connections', label: 'Connect', mark: '03' },
 ] as const;
 
 export function Sidebar() {
@@ -20,9 +20,9 @@ export function Sidebar() {
   return (
     <View style={styles.sidebar}>
       <View style={styles.brandBlock}>
-        <NestLogo size={32} />
-        <NestText variant="meta" style={styles.tagline}>
-          {user?.name ? `Hi, ${user.name.split(' ')[0]}` : 'Your focus nest'}
+        <NestLogo size={28} showWordmark={false} />
+        <NestText variant="brand" style={styles.word}>
+          Nest
         </NestText>
       </View>
 
@@ -35,11 +35,11 @@ export function Sidebar() {
               key={link.href}
               onPress={() => router.push(link.href)}
               style={sx(styles.link, active && styles.linkActive)}>
+              <NestText variant="meta" style={sx(styles.mark, active && styles.markActive)}>
+                {link.mark}
+              </NestText>
               <NestText variant="body" style={sx(styles.linkLabel, active && styles.linkLabelActive)}>
                 {link.label}
-              </NestText>
-              <NestText variant="meta" style={active ? styles.hintActive : styles.hint}>
-                {link.hint}
               </NestText>
             </Pressable>
           );
@@ -48,7 +48,7 @@ export function Sidebar() {
 
       <View style={styles.footer}>
         <NestText variant="meta" numberOfLines={1} style={styles.email}>
-          {user?.email}
+          {user?.name?.split(' ')[0] || user?.email}
         </NestText>
         <Pressable
           hitSlop={8}
@@ -77,12 +77,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   brandBlock: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: space.sm,
     paddingHorizontal: space.xs,
-    marginBottom: space.xl,
+    marginBottom: space.xxl,
   },
-  tagline: {
-    color: colors.inkMuted,
+  word: {
+    fontSize: 22,
+    lineHeight: 26,
+    letterSpacing: -0.6,
   },
   nav: {
     flex: 1,
@@ -90,27 +94,31 @@ const styles = StyleSheet.create({
   },
   link: {
     borderRadius: radius.md,
-    paddingVertical: space.sm,
+    paddingVertical: space.md,
     paddingHorizontal: space.sm,
-    gap: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
   },
   linkActive: {
     backgroundColor: colors.leafSoft,
   },
+  mark: {
+    fontFamily: fonts.bodyBold,
+    color: colors.inkSoft,
+    minWidth: 22,
+  },
+  markActive: {
+    color: colors.leaf,
+  },
   linkLabel: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 15,
+    fontSize: 16,
     color: colors.inkMuted,
   },
   linkLabelActive: {
     color: colors.leafDeep,
     fontFamily: fonts.bodyBold,
-  },
-  hint: {
-    color: colors.inkSoft,
-  },
-  hintActive: {
-    color: colors.leaf,
   },
   footer: {
     paddingHorizontal: space.xs,

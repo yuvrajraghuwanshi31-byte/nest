@@ -76,6 +76,45 @@ function isSameDay(a: Date, b: Date) {
   );
 }
 
+export type DayBucket = 'overdue' | 'today' | 'upcoming' | 'someday';
+
+export const DAY_BUCKET_LABELS: Record<DayBucket, string> = {
+  overdue: 'Overdue',
+  today: 'Today',
+  upcoming: 'Upcoming',
+  someday: 'Someday',
+};
+
+export function bucketForTask(task: RankedTask): DayBucket {
+  if (task.urgency === 'overdue') return 'overdue';
+  if (task.urgency === 'today') return 'today';
+  if (task.urgency === 'soon' || (task.dueAt && task.urgency === 'later')) return 'upcoming';
+  return 'someday';
+}
+
+/** Group ranked tasks into day-board sections (empty sections omitted). */
+export function groupTasksByDay(ranked: RankedTask[]): { bucket: DayBucket; label: string; tasks: RankedTask[] }[] {
+  const order: DayBucket[] = ['overdue', 'today', 'upcoming', 'someday'];
+  const map: Record<DayBucket, RankedTask[]> = {
+    overdue: [],
+    today: [],
+    upcoming: [],
+    someday: [],
+  };
+
+  for (const task of ranked) {
+    map[bucketForTask(task)].push(task);
+  }
+
+  return order
+    .filter((bucket) => map[bucket].length > 0)
+    .map((bucket) => ({
+      bucket,
+      label: DAY_BUCKET_LABELS[bucket],
+      tasks: map[bucket],
+    }));
+}
+
 export function formatDue(dueAt: string | null, now = new Date()): string {
   if (!dueAt) return 'No due date';
   const due = new Date(dueAt);

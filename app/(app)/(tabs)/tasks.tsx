@@ -3,8 +3,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { NestText } from '@/components/NestText';
 import { Screen } from '@/components/Screen';
-import { TaskRow } from '@/components/TaskRow';
+import { DaySection } from '@/components/tasks/DaySection';
 import { colors, fonts, radius, space } from '@/constants/theme';
+import { groupTasksByDay } from '@/lib/rankTasks';
 import { useTasks } from '@/lib/TasksContext';
 import type { TaskSource } from '@/lib/types';
 import { sx } from '@/lib/sx';
@@ -20,13 +21,17 @@ export default function TasksScreen() {
     return ranked.filter((t) => t.source === filter);
   }, [filter, ranked]);
 
+  const sections = useMemo(() => groupTasksByDay(filtered), [filtered]);
+
+  let runningIndex = 0;
+
   return (
     <Screen>
       <View style={styles.header}>
-        <NestText variant="label">Library</NestText>
-        <NestText variant="title">All tasks</NestText>
+        <NestText variant="label">Board</NestText>
+        <NestText variant="title">Your day</NestText>
         <NestText variant="subtitle">
-          Everything in one place, sorted by what matters most.
+          Grouped by when it matters — overdue first, then today, then what can wait.
         </NestText>
       </View>
 
@@ -34,8 +39,8 @@ export default function TasksScreen() {
         {(
           [
             ['all', 'All'],
-            ['schoology', 'Schoology'],
             ['craft', 'Craft'],
+            ['schoology', 'Schoology'],
           ] as const
         ).map(([value, label]) => {
           const active = filter === value;
@@ -54,16 +59,28 @@ export default function TasksScreen() {
         })}
       </View>
 
-      <View>
-        {filtered.map((task, index) => (
-          <TaskRow key={task.id} task={task} index={index} onComplete={completeTask} />
-        ))}
-        {filtered.length === 0 ? (
-          <View style={styles.empty}>
-            <NestText variant="subtitle">No open tasks in this view.</NestText>
-          </View>
-        ) : null}
-      </View>
+      {sections.length === 0 ? (
+        <View style={styles.empty}>
+          <NestText variant="title" style={styles.emptyTitle}>
+            Nothing here
+          </NestText>
+          <NestText variant="subtitle">You’re clear in this view.</NestText>
+        </View>
+      ) : (
+        sections.map((section) => {
+          const start = runningIndex;
+          runningIndex += section.tasks.length;
+          return (
+            <DaySection
+              key={section.bucket}
+              label={section.label}
+              tasks={section.tasks}
+              onComplete={completeTask}
+              startIndex={start}
+            />
+          );
+        })
+      )}
     </Screen>
   );
 }
@@ -79,15 +96,15 @@ const styles = StyleSheet.create({
   },
   chip: {
     paddingHorizontal: space.md,
-    paddingVertical: space.sm,
+    paddingVertical: space.xs,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.line,
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: 'transparent',
   },
   chipActive: {
-    backgroundColor: colors.leaf,
-    borderColor: colors.leaf,
+    backgroundColor: colors.ink,
+    borderColor: colors.ink,
   },
   chipText: {
     fontFamily: fonts.bodyMedium,
@@ -98,6 +115,10 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyBold,
   },
   empty: {
-    paddingVertical: space.xl,
+    paddingVertical: space.xxl,
+    gap: space.xs,
+  },
+  emptyTitle: {
+    fontSize: 24,
   },
 });

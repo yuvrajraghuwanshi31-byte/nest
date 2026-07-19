@@ -25,9 +25,9 @@ export default function SignupScreen() {
       await signUp({ name, email, password });
       Alert.alert(
         'Connect Craft?',
-        'Nest pulls your todos from Craft. In the Craft app, open Imagine in the sidebar → Add API Connection → copy your API URL. Then open Connections in Nest (Connect tab on your phone) and tap Sync Craft now.',
+        'Nest pulls your todos from Craft. In Craft: Imagine → Add API Connection → copy your API URL. Then open Connect in Nest and paste it.',
         [
-          { text: 'Go to Connections', onPress: () => router.replace('/connections') },
+          { text: 'Go to Connect', onPress: () => router.replace('/connections') },
           { text: 'Maybe later', onPress: () => router.replace('/home') },
         ],
       );
