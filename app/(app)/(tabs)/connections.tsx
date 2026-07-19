@@ -1,10 +1,12 @@
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { NestText } from '@/components/NestText';
 import { Screen } from '@/components/Screen';
 import { Button } from '@/components/ui/Button';
+import { TextField } from '@/components/ui/TextField';
 import { colors, fonts, radius, space } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
 import { useTasks } from '@/lib/TasksContext';
@@ -12,9 +14,39 @@ import { useWideLayout } from '@/hooks/useWideLayout';
 import { sx } from '@/lib/sx';
 
 export default function ConnectionsScreen() {
-  const { connections, loading, syncError, refresh } = useTasks();
+  const {
+    connections,
+    loading,
+    syncError,
+    craftApiUrl,
+    saveCraftApiUrl,
+    refresh,
+  } = useTasks();
   const { signOut } = useAuth();
   const wide = useWideLayout();
+  const [draftUrl, setDraftUrl] = useState(craftApiUrl);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveOk, setSaveOk] = useState(false);
+
+  useEffect(() => {
+    setDraftUrl(craftApiUrl);
+  }, [craftApiUrl]);
+
+  const onSaveAndSync = async () => {
+    setSaving(true);
+    setSaveError(null);
+    setSaveOk(false);
+    try {
+      await saveCraftApiUrl(draftUrl);
+      setSaveOk(true);
+      await refresh();
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Could not save Craft URL.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <Screen>
@@ -22,21 +54,46 @@ export default function ConnectionsScreen() {
         <NestText variant="label">Connections</NestText>
         <NestText variant="title">Control school + todos from Nest</NestText>
         <NestText variant="subtitle">
-          Link Craft to pull your real todos. Schoology connects next — no fake schoolwork in the
-          list.
+          Paste your Craft API URL here to pull real todos. Schoology connects next.
         </NestText>
       </View>
 
       <View style={styles.setupCard}>
-        <NestText variant="label">Craft API setup</NestText>
+        <NestText variant="label">Craft API URL</NestText>
         <NestText variant="body" style={styles.setupLine}>
-          In Craft: open Imagine in the sidebar → Add API Connection → copy your API URL. Manage
-          connections anytime in Craft Settings → API.
+          In Craft: Imagine (sidebar) → Add API Connection → copy the API URL at the top. It looks
+          like https://connect.craft.do/links/…/api/v1
         </NestText>
-        <NestText variant="body" style={styles.setupLine}>
-          In Nest: stay on this screen (Connections on desktop, Connect tab on phone) and tap Sync
-          Craft now once your API URL is set up.
-        </NestText>
+
+        <TextField
+          label="Your Craft API URL"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="off"
+          value={draftUrl}
+          onChangeText={(text) => {
+            setDraftUrl(text);
+            setSaveOk(false);
+          }}
+          placeholder="https://connect.craft.do/links/…/api/v1"
+        />
+
+        <Button
+          label={saving || loading ? 'Saving & syncing…' : 'Save & sync Craft'}
+          onPress={onSaveAndSync}
+          disabled={saving || loading}
+        />
+
+        {saveOk && !saveError ? (
+          <NestText variant="meta" style={styles.ok}>
+            Craft URL saved.
+          </NestText>
+        ) : null}
+        {saveError ? (
+          <NestText variant="meta" style={styles.error}>
+            {saveError}
+          </NestText>
+        ) : null}
       </View>
 
       <View style={styles.list}>
@@ -77,8 +134,9 @@ export default function ConnectionsScreen() {
 
       <Button
         label={loading ? 'Syncing…' : 'Sync Craft now'}
+        variant="secondary"
         onPress={() => refresh()}
-        disabled={loading}
+        disabled={loading || saving}
       />
 
       {!wide ? (
@@ -157,5 +215,8 @@ const styles = StyleSheet.create({
   },
   error: {
     color: colors.urgent,
+  },
+  ok: {
+    color: colors.leaf,
   },
 });

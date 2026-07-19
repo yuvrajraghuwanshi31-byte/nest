@@ -13,25 +13,47 @@ export type CraftTaskItem = {
   };
 };
 
-function baseUrl() {
-  const url = process.env.EXPO_PUBLIC_CRAFT_API_URL?.replace(/\/$/, '');
-  if (!url) throw new Error('Missing EXPO_PUBLIC_CRAFT_API_URL');
-  return url;
+/** Normalize pasted Craft API URLs into `.../api/v1` with no trailing slash. */
+export function normalizeCraftApiUrl(raw: string): string {
+  let url = raw.trim();
+  if (!url) return '';
+
+  // Allow pasting the share link without /api/v1
+  if (/connect\.craft\.do\/links\/[^/\s]+\/?$/i.test(url)) {
+    url = url.replace(/\/?$/, '/api/v1');
+  }
+
+  return url.replace(/\/$/, '');
 }
 
-export async function fetchCraftConnection() {
-  const res = await fetch(`${baseUrl()}/connection`);
+export function resolveCraftApiUrl(userUrl?: string | null): string {
+  const fromUser = normalizeCraftApiUrl(userUrl ?? '');
+  if (fromUser) return fromUser;
+
+  const fromEnv = normalizeCraftApiUrl(process.env.EXPO_PUBLIC_CRAFT_API_URL ?? '');
+  if (fromEnv) return fromEnv;
+
+  throw new Error('Add your Craft API URL on the Connections screen.');
+}
+
+function requireBase(userUrl?: string | null) {
+  return resolveCraftApiUrl(userUrl);
+}
+
+export async function fetchCraftConnection(userUrl?: string | null) {
+  const res = await fetch(`${requireBase(userUrl)}/connection`);
   if (!res.ok) throw new Error(`Craft connection failed (${res.status})`);
   return res.json() as Promise<{
     space?: { name?: string; friendlyDate?: string };
   }>;
 }
 
-export async function fetchCraftTasks(): Promise<CraftTaskItem[]> {
+export async function fetchCraftTasks(userUrl?: string | null): Promise<CraftTaskItem[]> {
+  const base = requireBase(userUrl);
   const scopes = ['inbox', 'active', 'upcoming'] as const;
   const results = await Promise.all(
     scopes.map(async (scope) => {
-      const res = await fetch(`${baseUrl()}/tasks?scope=${scope}`);
+      const res = await fetch(`${base}/tasks?scope=${scope}`);
       if (!res.ok) throw new Error(`Craft tasks failed (${res.status})`);
       const data = (await res.json()) as { items?: CraftTaskItem[] };
       return data.items ?? [];
@@ -46,8 +68,8 @@ export async function fetchCraftTasks(): Promise<CraftTaskItem[]> {
   return [...byId.values()];
 }
 
-export async function completeCraftTask(id: string) {
-  const res = await fetch(`${baseUrl()}/tasks`, {
+export async function completeCraftTask(id: string, userUrl?: string | null) {
+  const res = await fetch(`${requireBase(userUrl)}/tasks`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -73,10 +95,12 @@ export function craftItemToTask(item: CraftTaskItem): Task {
 }
 
 function titleFromMarkdown(markdown: string) {
-  return markdown
-    .replace(/^[-*]\s+\[[ xX]\]\s*/, '')
-    .replace(/^#+\s*/, '')
-    .trim() || 'Untitled task';
+  return (
+    markdown
+      .replace(/^[-*]\s+\[[ xX]\]\s*/, '')
+      .replace(/^#+\s*/, '')
+      .trim() || 'Untitled task'
+  );
 }
 
 function dueFromCraft(item: CraftTaskItem): string | null {

@@ -15,10 +15,12 @@ import {
   craftTaskId,
   fetchCraftConnection,
   fetchCraftTasks,
+  normalizeCraftApiUrl,
 } from './craft';
 import { briefingLine, rankTasks, type RankedTask } from './rankTasks';
 import type { Connection, Task } from './types';
 import { useAuth } from './AuthContext';
+import { supabase } from './supabase';
 
 type TasksContextValue = {
   tasks: Task[];
@@ -27,6 +29,10 @@ type TasksContextValue = {
   connections: Connection[];
   loading: boolean;
   syncError: string | null;
+  craftApiUrl: string;
+  craftUrlReady: boolean;
+  setCraftApiUrl: (url: string) => void;
+  saveCraftApiUrl: (url: string) => Promise<void>;
   refresh: () => Promise<void>;
   completeTask: (id: string) => Promise<void>;
   reopenTask: (id: string) => void;
@@ -41,15 +47,42 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   const [connections, setConnections] = useState<Connection[]>(DEMO_CONNECTIONS);
   const [loading, setLoading] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [craftApiUrl, setCraftApiUrlState] = useState('');
+  const [craftUrlReady, setCraftUrlReady] = useState(false);
+
+  const setCraftApiUrl = useCallback((url: string) => {
+    setCraftApiUrlState(url);
+  }, []);
+
+  const saveCraftApiUrl = useCallback(
+    async (url: string) => {
+      if (!user) throw new Error('Sign in to save your Craft URL.');
+      const normalized = normalizeCraftApiUrl(url);
+      if (!normalized) throw new Error('Paste your Craft API URL.');
+      if (!normalized.includes('connect.craft.do')) {
+        throw new Error('That doesn’t look like a Craft API URL. It should include connect.craft.do');
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ craft_api_url: normalized, updated_at: new Date().toISOString() })
+        .eq('id', user.id);
+
+      if (error) throw new Error(error.message);
+      setCraftApiUrlState(normalized);
+    },
+    [user],
+  );
 
   const refresh = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     setSyncError(null);
     try {
+      const url = craftApiUrl || null;
       const [items, connection] = await Promise.all([
-        fetchCraftTasks(),
-        fetchCraftConnection().catch(() => null),
+        fetchCraftTasks(url),
+        fetchCraftConnection(url).catch(() => null),
       ]);
       setCraftTasks(items.map(craftItemToTask));
       setConnections([
@@ -92,21 +125,49 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, craftApiUrl]);
 
+  // Load saved Craft URL from the user profile.
   useEffect(() => {
+    let mounted = true;
+
     if (!user) {
+      setCraftApiUrlState('');
+      setCraftUrlReady(true);
       setCraftTasks([]);
       setLocalCompleted({});
       setConnections(DEMO_CONNECTIONS);
       setSyncError(null);
-      return;
+      return () => {
+        mounted = false;
+      };
     }
-    refresh();
-  }, [user, refresh]);
+
+    setCraftUrlReady(false);
+    void supabase
+      .from('profiles')
+      .select('craft_api_url')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!mounted) return;
+        const saved = typeof data?.craft_api_url === 'string' ? data.craft_api_url : '';
+        setCraftApiUrlState(saved || process.env.EXPO_PUBLIC_CRAFT_API_URL?.trim() || '');
+        setCraftUrlReady(true);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  // Sync when user + URL are ready.
+  useEffect(() => {
+    if (!user || !craftUrlReady) return;
+    void refresh();
+  }, [user, craftUrlReady, craftApiUrl, refresh]);
 
   const tasks = useMemo(() => {
-    // Real Craft tasks only — Schoology stays empty until that API is connected.
     return craftTasks.map((t) => ({
       ...t,
       completed: localCompleted[t.id] ?? t.completed,
@@ -116,17 +177,20 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   const ranked = useMemo(() => rankTasks(tasks), [tasks]);
   const briefing = useMemo(() => briefingLine(ranked), [ranked]);
 
-  const completeTask = useCallback(async (id: string) => {
-    setLocalCompleted((prev) => ({ ...prev, [id]: true }));
-    if (id.startsWith('craft:')) {
-      try {
-        await completeCraftTask(craftTaskId(id));
-      } catch (e) {
-        setLocalCompleted((prev) => ({ ...prev, [id]: false }));
-        setSyncError(e instanceof Error ? e.message : 'Could not update Craft task.');
+  const completeTask = useCallback(
+    async (id: string) => {
+      setLocalCompleted((prev) => ({ ...prev, [id]: true }));
+      if (id.startsWith('craft:')) {
+        try {
+          await completeCraftTask(craftTaskId(id), craftApiUrl || null);
+        } catch (e) {
+          setLocalCompleted((prev) => ({ ...prev, [id]: false }));
+          setSyncError(e instanceof Error ? e.message : 'Could not update Craft task.');
+        }
       }
-    }
-  }, []);
+    },
+    [craftApiUrl],
+  );
 
   const reopenTask = useCallback((id: string) => {
     setLocalCompleted((prev) => ({ ...prev, [id]: false }));
@@ -141,6 +205,10 @@ export function TasksProvider({ children }: { children: ReactNode }) {
         connections,
         loading,
         syncError,
+        craftApiUrl,
+        craftUrlReady,
+        setCraftApiUrl,
+        saveCraftApiUrl,
         refresh,
         completeTask,
         reopenTask,
