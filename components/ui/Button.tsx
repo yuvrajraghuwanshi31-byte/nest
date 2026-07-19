@@ -16,22 +16,24 @@ export function Button({ label, onPress, variant = 'primary', disabled, style }:
     <Pressable
       disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [
-        styles.base,
-        variant === 'primary' && styles.primary,
-        variant === 'secondary' && styles.secondary,
-        variant === 'ghost' && styles.ghost,
-        (pressed || disabled) && styles.dim,
-        style,
-      ]}>
+      style={({ pressed }) =>
+        StyleSheet.flatten([
+          styles.base,
+          variant === 'primary' && styles.primary,
+          variant === 'secondary' && styles.secondary,
+          variant === 'ghost' && styles.ghost,
+          (pressed || disabled) && styles.dim,
+          style,
+        ])
+      }>
       <NestText
         variant="body"
-        style={[
+        style={StyleSheet.flatten([
           styles.label,
           variant === 'primary' && styles.labelOnPrimary,
           variant === 'secondary' && styles.labelOnSecondary,
           variant === 'ghost' && styles.labelOnGhost,
-        ]}>
+        ])}>
         {label}
       </NestText>
     </Pressable>

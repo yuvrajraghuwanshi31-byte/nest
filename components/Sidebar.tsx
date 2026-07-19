@@ -31,10 +31,16 @@ export function Sidebar() {
 
           return (
             <Link key={link.href} href={link.href} asChild>
-              <Pressable style={[styles.link, active && styles.linkActive]}>
+              <Pressable
+                // Flatten styles: Link asChild + style arrays crashes RN Web
+                // (CSSStyleDeclaration indexed property setter).
+                style={StyleSheet.flatten([styles.link, active && styles.linkActive])}>
                 <NestText
                   variant="body"
-                  style={[styles.linkLabel, active && styles.linkLabelActive]}>
+                  style={StyleSheet.flatten([
+                    styles.linkLabel,
+                    active && styles.linkLabelActive,
+                  ])}>
                   {link.label}
                 </NestText>
                 <NestText variant="meta" style={active ? styles.hintActive : undefined}>

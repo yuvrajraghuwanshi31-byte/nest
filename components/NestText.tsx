@@ -1,4 +1,4 @@
-import { Text, type TextProps, type TextStyle } from 'react-native';
+import { StyleSheet, Text, type TextProps, type TextStyle } from 'react-native';
 
 import { colors, fonts, type } from '@/constants/theme';
 
@@ -55,5 +55,5 @@ export function NestText({
   style,
   ...props
 }: TextProps & { variant?: Variant }) {
-  return <Text {...props} style={[styles[variant], style]} />;
+  return <Text {...props} style={StyleSheet.flatten([styles[variant], style])} />;
 }

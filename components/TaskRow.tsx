@@ -24,7 +24,7 @@ export function TaskRow({ task, index, onComplete, showReason = true }: Props) {
     <Animated.View entering={FadeInDown.delay(index * 40).springify().damping(20)}>
       <Pressable
         onPress={() => onComplete(task.id)}
-        style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
+        style={({ pressed }) => StyleSheet.flatten([styles.row, pressed && styles.pressed])}>
         <View style={styles.checkWrap}>
           <View style={styles.check} />
         </View>
