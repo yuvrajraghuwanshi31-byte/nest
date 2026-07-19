@@ -9,6 +9,7 @@ import { colors, fonts, radius, space } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
 import { useTasks } from '@/lib/TasksContext';
 import { useWideLayout } from '@/hooks/useWideLayout';
+import { sx } from '@/lib/sx';
 
 export default function ConnectionsScreen() {
   const { connections, loading, syncError, refresh } = useTasks();
@@ -29,14 +30,12 @@ export default function ConnectionsScreen() {
       <View style={styles.setupCard}>
         <NestText variant="label">Craft API setup</NestText>
         <NestText variant="body" style={styles.setupLine}>
-          In Craft: open <NestText style={styles.setupEm}>Imagine</NestText> in the sidebar →{' '}
-          <NestText style={styles.setupEm}>Add API Connection</NestText> → copy your API URL. You
-          can manage connections anytime in Craft Settings → API.
+          In Craft: open Imagine in the sidebar → Add API Connection → copy your API URL. Manage
+          connections anytime in Craft Settings → API.
         </NestText>
         <NestText variant="body" style={styles.setupLine}>
-          In Nest: stay on this screen (Connections on desktop,{' '}
-          <NestText style={styles.setupEm}>Connect</NestText> tab on phone) and tap{' '}
-          <NestText style={styles.setupEm}>Sync Craft now</NestText> once your API URL is set up.
+          In Nest: stay on this screen (Connections on desktop, Connect tab on phone) and tap Sync
+          Craft now once your API URL is set up.
         </NestText>
       </View>
 
@@ -51,12 +50,9 @@ export default function ConnectionsScreen() {
                 {connection.name}
               </NestText>
               <View
-                style={[
-                  styles.badge,
-                  {
-                    backgroundColor: badgeBg(connection.status, connection.id),
-                  },
-                ]}>
+                style={sx(styles.badge, {
+                  backgroundColor: badgeBg(connection.status, connection.id),
+                })}>
                 <NestText
                   variant="meta"
                   style={{
@@ -132,10 +128,6 @@ const styles = StyleSheet.create({
   setupLine: {
     color: colors.inkSoft,
     lineHeight: 22,
-  },
-  setupEm: {
-    fontFamily: fonts.bodyBold,
-    color: colors.ink,
   },
   list: {
     gap: space.xs,

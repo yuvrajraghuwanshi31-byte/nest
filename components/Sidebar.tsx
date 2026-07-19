@@ -1,10 +1,11 @@
-import { Link, router, usePathname } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { NestLogo } from '@/components/NestLogo';
 import { NestText } from '@/components/NestText';
 import { colors, fonts, layout, radius, space } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
+import { sx } from '@/lib/sx';
 
 const LINKS = [
   { href: '/home', label: 'Do this next', hint: 'Ranked focus' },
@@ -30,24 +31,17 @@ export function Sidebar() {
           const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
 
           return (
-            <Link key={link.href} href={link.href} asChild>
-              <Pressable
-                // Flatten styles: Link asChild + style arrays crashes RN Web
-                // (CSSStyleDeclaration indexed property setter).
-                style={StyleSheet.flatten([styles.link, active && styles.linkActive])}>
-                <NestText
-                  variant="body"
-                  style={StyleSheet.flatten([
-                    styles.linkLabel,
-                    active && styles.linkLabelActive,
-                  ])}>
-                  {link.label}
-                </NestText>
-                <NestText variant="meta" style={active ? styles.hintActive : undefined}>
-                  {link.hint}
-                </NestText>
-              </Pressable>
-            </Link>
+            <Pressable
+              key={link.href}
+              onPress={() => router.push(link.href)}
+              style={sx(styles.link, active && styles.linkActive)}>
+              <NestText variant="body" style={sx(styles.linkLabel, active && styles.linkLabelActive)}>
+                {link.label}
+              </NestText>
+              <NestText variant="meta" style={active ? styles.hintActive : undefined}>
+                {link.hint}
+              </NestText>
+            </Pressable>
           );
         })}
       </View>

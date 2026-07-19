@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, type ViewStyle } from 'react-native';
 
 import { NestText } from '@/components/NestText';
 import { colors, fonts, radius, space } from '@/constants/theme';
+import { sx } from '@/lib/sx';
 
 type Props = {
   label: string;
@@ -17,23 +18,23 @@ export function Button({ label, onPress, variant = 'primary', disabled, style }:
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) =>
-        StyleSheet.flatten([
+        sx(
           styles.base,
           variant === 'primary' && styles.primary,
           variant === 'secondary' && styles.secondary,
           variant === 'ghost' && styles.ghost,
           (pressed || disabled) && styles.dim,
           style,
-        ])
+        )
       }>
       <NestText
         variant="body"
-        style={StyleSheet.flatten([
+        style={sx(
           styles.label,
           variant === 'primary' && styles.labelOnPrimary,
           variant === 'secondary' && styles.labelOnSecondary,
           variant === 'ghost' && styles.labelOnGhost,
-        ])}>
+        )}>
         {label}
       </NestText>
     </Pressable>

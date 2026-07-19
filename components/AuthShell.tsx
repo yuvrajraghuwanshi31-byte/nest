@@ -1,11 +1,12 @@
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import { ReactNode } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { NestLogo } from '@/components/NestLogo';
 import { NestText } from '@/components/NestText';
 import { colors, space } from '@/constants/theme';
+import { sx } from '@/lib/sx';
 
 export function AuthShell({
   title,
@@ -23,18 +24,15 @@ export function AuthShell({
   return (
     <View style={styles.flex}>
       <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          {
-            paddingTop: insets.top + space.xl,
-            paddingBottom: insets.bottom + space.xl,
-          },
-        ]}
+        contentContainerStyle={sx(styles.content, {
+          paddingTop: insets.top + space.xl,
+          paddingBottom: insets.bottom + space.xl,
+        })}
         keyboardShouldPersistTaps="handled">
         <View style={styles.panel}>
-          <Link href="/">
+          <Pressable onPress={() => router.push('/')} hitSlop={8}>
             <NestLogo size={30} />
-          </Link>
+          </Pressable>
           <View style={styles.heading}>
             <NestText variant="title">{title}</NestText>
             <NestText variant="subtitle">{subtitle}</NestText>

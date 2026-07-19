@@ -7,6 +7,7 @@ import { TaskRow } from '@/components/TaskRow';
 import { colors, fonts, radius, space } from '@/constants/theme';
 import { useTasks } from '@/lib/TasksContext';
 import type { TaskSource } from '@/lib/types';
+import { sx } from '@/lib/sx';
 
 type Filter = 'all' | TaskSource;
 
@@ -42,10 +43,10 @@ export default function TasksScreen() {
             <Pressable
               key={value}
               onPress={() => setFilter(value)}
-              style={[styles.chip, active && styles.chipActive]}>
+              style={sx(styles.chip, active && styles.chipActive)}>
               <NestText
                 variant="meta"
-                style={[styles.chipText, active && styles.chipTextActive]}>
+                style={sx(styles.chipText, active && styles.chipTextActive)}>
                 {label}
               </NestText>
             </Pressable>

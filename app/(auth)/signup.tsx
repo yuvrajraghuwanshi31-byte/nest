@@ -1,6 +1,6 @@
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { AuthShell } from '@/components/AuthShell';
 import { NestText } from '@/components/NestText';
@@ -54,12 +54,16 @@ export default function SignupScreen() {
       title="Create your Nest"
       subtitle="One account for Schoology, Craft, and your daily focus list."
       footer={
-        <NestText variant="meta" style={styles.footerText}>
-          Already have an account?{' '}
-          <Link href="/login" style={styles.link}>
-            Sign in
-          </Link>
-        </NestText>
+        <View style={styles.footerRow}>
+          <NestText variant="meta" style={styles.footerText}>
+            Already have an account?
+          </NestText>
+          <Pressable onPress={() => router.push('/login')} hitSlop={6}>
+            <NestText variant="meta" style={styles.link}>
+              Sign in
+            </NestText>
+          </Pressable>
+        </View>
       }>
       <Button
         label={googleLoading ? 'Opening Google…' : 'Continue with Google'}
@@ -118,12 +122,19 @@ const styles = StyleSheet.create({
   error: {
     color: colors.urgent,
   },
+  footerRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+  },
   footerText: {
     textAlign: 'center',
   },
   link: {
     color: colors.leaf,
-    fontWeight: '700',
+    fontFamily: fonts.bodyBold,
   },
   divider: {
     flexDirection: 'row',

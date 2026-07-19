@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors, layout, space } from '@/constants/theme';
 import { useWideLayout } from '@/hooks/useWideLayout';
+import { sx } from '@/lib/sx';
 
 export function Screen({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {
   const insets = useSafeAreaInsets();
@@ -11,14 +12,11 @@ export function Screen({ children, scroll = true }: { children: ReactNode; scrol
 
   const body = (
     <View
-      style={[
-        styles.inner,
-        {
-          paddingTop: wide ? space.xl : insets.top + space.md,
-          paddingBottom: wide ? space.xl : insets.bottom + 80,
-          maxWidth: layout.maxWidth,
-        },
-      ]}>
+      style={sx(styles.inner, {
+        paddingTop: wide ? space.xl : insets.top + space.md,
+        paddingBottom: wide ? space.xl : insets.bottom + 80,
+        maxWidth: layout.maxWidth,
+      })}>
       {children}
     </View>
   );
@@ -33,7 +31,7 @@ export function Screen({ children, scroll = true }: { children: ReactNode; scrol
           {body}
         </ScrollView>
       ) : (
-        <View style={[styles.flex, styles.scrollContent]}>{body}</View>
+        <View style={sx(styles.flex, styles.scrollContent)}>{body}</View>
       )}
     </View>
   );

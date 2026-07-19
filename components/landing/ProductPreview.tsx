@@ -1,7 +1,7 @@
+import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
-  FadeInDown,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -9,10 +9,10 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { useEffect } from 'react';
 
 import { NestText } from '@/components/NestText';
 import { colors, fonts, radius, space } from '@/constants/theme';
+import { sx } from '@/lib/sx';
 
 const TASKS = [
   { title: 'Finish the lab report', meta: 'Chemistry · due tonight', tone: colors.urgent },
@@ -43,13 +43,13 @@ export function ProductPreview({ wide }: { wide?: boolean }) {
   }));
 
   return (
-    <View style={[styles.wrap, wide && styles.wrapWide]}>
+    <View style={sx(styles.wrap, wide && styles.wrapWide)}>
       <Animated.View style={[styles.glow, glowStyle]} />
-      <Animated.View entering={FadeInDown.delay(280).duration(800).springify()} style={styles.frame}>
+      <View style={styles.frame}>
         <View style={styles.chrome}>
           <View style={styles.dot} />
-          <View style={[styles.dot, styles.dotMid]} />
-          <View style={[styles.dot, styles.dotEnd]} />
+          <View style={sx(styles.dot, styles.dotMid)} />
+          <View style={sx(styles.dot, styles.dotEnd)} />
           <NestText variant="meta" style={styles.chromeLabel}>
             Do this next
           </NestText>
@@ -63,12 +63,9 @@ export function ProductPreview({ wide }: { wide?: boolean }) {
         </NestText>
 
         <View style={styles.list}>
-          {TASKS.map((task, i) => (
-            <Animated.View
-              key={task.title}
-              entering={FadeInDown.delay(480 + i * 120).duration(600).springify()}
-              style={styles.row}>
-              <View style={[styles.tick, { borderColor: task.tone }]} />
+          {TASKS.map((task) => (
+            <View key={task.title} style={styles.row}>
+              <View style={sx(styles.tick, { borderColor: task.tone })} />
               <View style={styles.rowText}>
                 <NestText variant="body" style={styles.rowTitle}>
                   {task.title}
@@ -77,10 +74,10 @@ export function ProductPreview({ wide }: { wide?: boolean }) {
                   {task.meta}
                 </NestText>
               </View>
-            </Animated.View>
+            </View>
           ))}
         </View>
-      </Animated.View>
+      </View>
     </View>
   );
 }
@@ -103,7 +100,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.leafDeep,
     borderRadius: radius.xl,
     opacity: 0.4,
-    // Soft bloom behind the product frame
     transform: [{ scale: 1.06 }],
   },
   frame: {

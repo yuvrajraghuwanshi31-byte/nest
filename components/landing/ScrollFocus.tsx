@@ -13,6 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { colors, space } from '@/constants/theme';
+import { sx } from '@/lib/sx';
 
 const easeOut = Easing.bezier(0.22, 1, 0.36, 1);
 
@@ -119,7 +120,7 @@ export function StickyScene({ scrollY, start, screens = 1.55, children }: Sticky
 
   return (
     <View style={{ height: runway, backgroundColor: 'transparent' }}>
-      <View style={[styles.sticky, { height: vh }]}>{children(progress)}</View>
+      <View style={sx(styles.sticky, { height: vh })}>{children(progress)}</View>
     </View>
   );
 }

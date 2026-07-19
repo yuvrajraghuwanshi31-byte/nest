@@ -1,10 +1,11 @@
-import { StyleSheet, Text, type TextProps, type TextStyle } from 'react-native';
+import { Text, type TextProps, type TextStyle } from 'react-native';
 
 import { colors, fonts, type } from '@/constants/theme';
+import { sx } from '@/lib/sx';
 
 type Variant = 'brand' | 'title' | 'subtitle' | 'body' | 'label' | 'meta';
 
-const styles: Record<Variant, TextStyle> = {
+const variants: Record<Variant, TextStyle> = {
   brand: {
     fontFamily: fonts.display,
     fontSize: type.brand.size,
@@ -55,5 +56,5 @@ export function NestText({
   style,
   ...props
 }: TextProps & { variant?: Variant }) {
-  return <Text {...props} style={StyleSheet.flatten([styles[variant], style])} />;
+  return <Text {...props} style={sx(variants[variant], style as TextStyle)} />;
 }

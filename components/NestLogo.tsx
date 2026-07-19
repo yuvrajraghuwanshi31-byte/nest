@@ -2,6 +2,7 @@ import { Image, StyleSheet, View, type ImageStyle, type ViewStyle } from 'react-
 
 import { NestText } from '@/components/NestText';
 import { colors, fonts, space } from '@/constants/theme';
+import { sx } from '@/lib/sx';
 
 type Props = {
   size?: number;
@@ -19,22 +20,28 @@ export function NestLogo({
   imageStyle,
 }: Props) {
   return (
-    <View style={[styles.row, style]}>
+    <View style={sx(styles.row, style)}>
       <Image
         source={require('../assets/images/nest-logo.png')}
-        style={[
+        style={sx(
           {
             width: size,
             height: size,
             borderRadius: size * 0.28,
           },
           imageStyle,
-        ]}
+        )}
         resizeMode="cover"
         accessibilityLabel="Nest logo"
       />
       {showWordmark ? (
-        <NestText variant="brand" style={[styles.wordmark, { color: wordmarkColor, fontSize: size * 0.7, lineHeight: size * 0.78 }]}>
+        <NestText
+          variant="brand"
+          style={sx(styles.wordmark, {
+            color: wordmarkColor,
+            fontSize: size * 0.7,
+            lineHeight: size * 0.78,
+          })}>
           Nest
         </NestText>
       ) : null}

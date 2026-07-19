@@ -1,6 +1,6 @@
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AuthShell } from '@/components/AuthShell';
 import { NestText } from '@/components/NestText';
@@ -46,12 +46,16 @@ export default function LoginScreen() {
       title="Welcome back"
       subtitle="Sign in to see what you need to do next."
       footer={
-        <NestText variant="meta" style={styles.footerText}>
-          New here?{' '}
-          <Link href="/signup" style={styles.link}>
-            Create an account
-          </Link>
-        </NestText>
+        <View style={styles.footerRow}>
+          <NestText variant="meta" style={styles.footerText}>
+            New here?
+          </NestText>
+          <Pressable onPress={() => router.push('/signup')} hitSlop={6}>
+            <NestText variant="meta" style={styles.link}>
+              Create an account
+            </NestText>
+          </Pressable>
+        </View>
       }>
       <Button
         label={googleLoading ? 'Opening Google…' : 'Continue with Google'}
@@ -99,12 +103,19 @@ const styles = StyleSheet.create({
   error: {
     color: colors.urgent,
   },
+  footerRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+  },
   footerText: {
     textAlign: 'center',
   },
   link: {
     color: colors.leaf,
-    fontWeight: '700',
+    fontFamily: fonts.bodyBold,
   },
   divider: {
     flexDirection: 'row',

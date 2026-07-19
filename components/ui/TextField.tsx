@@ -2,6 +2,7 @@ import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { NestText } from '@/components/NestText';
 import { colors, fonts, radius, space } from '@/constants/theme';
+import { sx } from '@/lib/sx';
 
 type Props = TextInputProps & {
   label: string;
@@ -14,7 +15,7 @@ export function TextField({ label, style, ...props }: Props) {
       <TextInput
         placeholderTextColor={colors.inkSoft}
         {...props}
-        style={[styles.input, style]}
+        style={sx(styles.input, style as object)}
       />
     </View>
   );

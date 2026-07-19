@@ -34,6 +34,7 @@ import { NestText } from '@/components/NestText';
 import { Button } from '@/components/ui/Button';
 import { colors, fonts, layout, radius, space } from '@/constants/theme';
 import { useAuth } from '@/lib/AuthContext';
+import { sx } from '@/lib/sx';
 
 export default function LandingScreen() {
   const { user, ready } = useAuth();
@@ -112,13 +113,13 @@ export default function LandingScreen() {
           style={StyleSheet.absoluteFill}
         />
         <ParallaxLayer scrollY={scrollY} speed={0.18} style={styles.orbWrap}>
-          <View style={[styles.orb, styles.orbA]} />
-          <View style={[styles.orb, styles.orbB]} />
+          <View style={sx(styles.orb, styles.orbA)} />
+          <View style={sx(styles.orb, styles.orbB)} />
         </ParallaxLayer>
       </View>
 
       {/* Nav */}
-      <View style={[styles.nav, { paddingTop: insets.top + space.xs }]}>
+      <View style={sx(styles.nav, { paddingTop: insets.top + space.xs })}>
         <Animated.View style={[styles.navBg, navStyle]} />
         <NestLogo size={30} />
         <View style={styles.navActions}>
@@ -140,19 +141,19 @@ export default function LandingScreen() {
         scrollEventThrottle={16}
         onScroll={onScroll}>
         {/* —— Hero —— */}
-        <View style={[styles.hero, { minHeight: heroH, paddingTop: navH + space.md }]}>
-          <Animated.View style={[styles.heroGrid, wide && styles.heroGridWide, heroStyle]}>
-            <View style={[styles.heroCopy, wide && styles.heroCopyWide]}>
+        <View style={sx(styles.hero, { minHeight: heroH, paddingTop: navH + space.md })}>
+          <Animated.View style={[sx(styles.heroGrid, wide && styles.heroGridWide), heroStyle]}>
+            <View style={sx(styles.heroCopy, wide && styles.heroCopyWide)}>
               <Enter delay={40}>
                 <NestLogo size={wide ? 56 : 48} showWordmark={false} />
               </Enter>
               <Enter delay={120}>
-                <NestText variant="brand" style={[styles.brand, wide && styles.brandWide]}>
+                <NestText variant="brand" style={sx(styles.brand, wide && styles.brandWide)}>
                   Nest
                 </NestText>
               </Enter>
               <Enter delay={220}>
-                <NestText variant="title" style={[styles.headline, wide && styles.headlineWide]}>
+                <NestText variant="title" style={sx(styles.headline, wide && styles.headlineWide)}>
                   Know what to do next.
                 </NestText>
               </Enter>
@@ -203,7 +204,7 @@ export default function LandingScreen() {
               <FocusLine progress={progress} from={0.05} to={0.52}>
                 <NestText
                   variant="title"
-                  style={[styles.focusTitle, wide && styles.focusTitleWide]}>
+                  style={sx(styles.focusTitle, wide && styles.focusTitleWide)}>
                   Schoology and Craft,{'\n'}finally together.
                 </NestText>
               </FocusLine>
@@ -229,7 +230,7 @@ export default function LandingScreen() {
               <FocusLine progress={progress} from={0.04} to={0.3}>
                 <NestText
                   variant="title"
-                  style={[styles.focusTitle, wide && styles.focusTitleWide]}>
+                  style={sx(styles.focusTitle, wide && styles.focusTitleWide)}>
                   It tells you what to do.
                 </NestText>
               </FocusLine>
@@ -311,7 +312,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.mistDeep,
   },
   orbWrap: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   orb: {
     position: 'absolute',
@@ -344,7 +345,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   navBg: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(5, 5, 5, 0.88)',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.line,

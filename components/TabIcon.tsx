@@ -2,6 +2,7 @@ import { StyleSheet, View, type ColorValue } from 'react-native';
 
 import { NestText } from '@/components/NestText';
 import { colors, fonts, radius } from '@/constants/theme';
+import { sx } from '@/lib/sx';
 
 const LABELS = {
   next: 'N',
@@ -17,8 +18,8 @@ export function TabIcon({
   color: ColorValue;
 }) {
   return (
-    <View style={[styles.wrap, { borderColor: color }]}>
-      <NestText variant="meta" style={[styles.label, { color }]}>
+    <View style={sx(styles.wrap, { borderColor: color })}>
+      <NestText variant="meta" style={sx(styles.label, { color })}>
         {LABELS[name]}
       </NestText>
     </View>
