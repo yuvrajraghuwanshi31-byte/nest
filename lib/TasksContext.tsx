@@ -63,12 +63,22 @@ export function TasksProvider({ children }: { children: ReactNode }) {
         throw new Error('That doesn’t look like a Craft API URL. It should include connect.craft.do');
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .update({ craft_api_url: normalized, updated_at: new Date().toISOString() })
-        .eq('id', user.id);
+        .upsert(
+          {
+            id: user.id,
+            name: user.name || 'Nest user',
+            craft_api_url: normalized,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'id' },
+        )
+        .select('id')
+        .maybeSingle();
 
       if (error) throw new Error(error.message);
+      if (!data) throw new Error('Could not save Craft URL to your profile. Try signing out and back in.');
       setCraftApiUrlState(normalized);
     },
     [user],
